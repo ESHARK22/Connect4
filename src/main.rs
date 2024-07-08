@@ -16,6 +16,32 @@ struct Game {
     board: Array2D<BoardState>,
     empty_character: String,
 }
+impl Game {
+    fn print_board(self) {
+        // Simply prints the board.
+
+        let board = self.board;
+        let empty_char = self.empty_character;
+        // Print each row, then a new line
+        for row_index in 0..board.num_rows() {
+            for col_index in 0..board.num_columns() {
+                let state = board.get(row_index, col_index);
+                match state {
+                    Some(state) => match state {
+                        BoardState::Empty => {
+                            print!("{}", empty_char)
+                        }
+                        BoardState::Taken(player) => {
+                            print!("{}", player.character)
+                        }
+                    },
+                    None => panic!("AHH, Stop trying and play outside the box!"),
+                }
+            }
+            println!();
+        }
+    }
+}
 
 #[derive(Debug, Clone)]
 enum BoardState {
@@ -38,13 +64,6 @@ fn main() {
         empty_character: "-".into(),
     };
 
-    for row_index in 0..game.board.num_rows() {
-        for col_index in 0..game.board.num_columns() {
-            print!("{:?}", game.board[(row_index, col_index)])
-        }
-        println!();
-    }
-
     let player1 = Player {
         name: "Player 1".into(),
         character: "O".into(),
@@ -56,4 +75,6 @@ fn main() {
         character: "X".into(),
         colour: format!("{bg_bright_red}").into(),
     };
+
+    game.print_board();
 }
