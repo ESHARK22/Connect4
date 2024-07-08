@@ -60,21 +60,32 @@ struct Player {
 }
 impl Player {
     fn play_turn(self, game: &mut Game) {
-        let mut board = &mut game.board;
+        let board = &mut game.board;
+        let name = self.name.clone();
+        loop {
+            println!("It is {}'s turn!", name);
 
-        println!("It is {}'s turn!", &self.name);
+            let col_index = int_input("Enter the column you would like to go in: ");
+            let row_index = int_input("Enter the row you would like to go in: "); // TODO: Remove, since should only be able to place at the botoom
 
-        let col_index = int_input("Enter the column you would like to go in: ");
-        let row_index = int_input("Enter the row you would like to go in: "); // TODO: Remove, since should only be able to place at the botoom
-
-        // TODO: make sure board state is empty before placing it
-
-        let mut state = board.get_mut(row_index, col_index);
-        match state {
-            Some(_) => {
-                board[(row_index, col_index)] = BoardState::Taken(self);
+            let current_state = board.get_mut(row_index, col_index);
+            match current_state {
+                Some(current_state) => match current_state {
+                    BoardState::Empty => {
+                        board[(row_index, col_index)] = BoardState::Taken(self.clone());
+                        return;
+                    }
+                    BoardState::Taken(player) => {
+                        println!("That space is already taken by {}!", player.name);
+                        println!("Try again...");
+                    }
+                },
+                None => {
+                    // Does not exist on the board
+                    println!("Oi, stop trying to play outside the box!");
+                    println!("Try again...");
+                }
             }
-            None => panic!("AHH. Does not exist!"),
         }
     }
 }
@@ -101,6 +112,7 @@ fn main() {
     loop {
         game.print_board();
         player1.clone().play_turn(&mut game);
+        println!("");
         game.print_board();
         player2.clone().play_turn(&mut game);
     }
