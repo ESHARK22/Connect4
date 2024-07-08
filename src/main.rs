@@ -1,6 +1,9 @@
 use array2d::Array2D;
 use inline_colorization::*;
 
+mod input_handlers;
+use input_handlers::int_input;
+
 // Connect 4 Rules - edited from https://rulesofplaying.com/connect-4-rules/
 //  - tic-tac-toe game played by two players.
 //  - Players take turns placing pieces on a vertical board.
@@ -17,11 +20,11 @@ struct Game {
     empty_character: String,
 }
 impl Game {
-    fn print_board(self) {
+    fn print_board(&self) {
         // Simply prints the board.
 
-        let board = self.board;
-        let empty_char = self.empty_character;
+        let board = &self.board;
+        let empty_char = &self.empty_character;
         // Print each row, then a new line
         for row_index in 0..board.num_rows() {
             for col_index in 0..board.num_columns() {
@@ -55,11 +58,31 @@ struct Player {
     character: String,
     colour: String,
 }
+impl Player {
+    fn play_turn(self, game: &mut Game) {
+        let mut board = &mut game.board;
+
+        println!("It is {}'s turn!", &self.name);
+
+        let col_index = int_input("Enter the column you would like to go in: ");
+        let row_index = int_input("Enter the row you would like to go in: "); // TODO: Remove, since should only be able to place at the botoom
+
+        // TODO: make sure board state is empty before placing it
+
+        let mut state = board.get_mut(row_index, col_index);
+        match state {
+            Some(_) => {
+                board[(row_index, col_index)] = BoardState::Taken(self);
+            }
+            None => panic!("AHH. Does not exist!"),
+        }
+    }
+}
 
 fn main() {
     println!("Hello from connect 4!");
 
-    let game = Game {
+    let mut game = Game {
         board: Array2D::filled_with(BoardState::Empty, 6, 7),
         empty_character: "-".into(),
     };
@@ -75,6 +98,10 @@ fn main() {
         character: "X".into(),
         colour: format!("{bg_bright_red}").into(),
     };
-
-    game.print_board();
+    loop {
+        game.print_board();
+        player1.clone().play_turn(&mut game);
+        game.print_board();
+        player2.clone().play_turn(&mut game);
+    }
 }
