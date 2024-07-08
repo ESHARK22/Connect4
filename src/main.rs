@@ -11,12 +11,36 @@ use array2d::Array2D;
 // Both the players begin with 21 similar pieces, and the first player to reach a series of four connected pieces wins the game.
 // If all the men have played and neither player has four parts in a row, the game is a tie.
 
+struct Game {
+    board: Array2D<BoardState>,
+    empty_character: String,
+}
+
+#[derive(Debug, Clone)]
+enum BoardState {
+    Taken(Player),
+    Empty,
+}
+
+#[derive(Debug, Clone)]
+struct Player {
+    name: String,
+    character: String,
+    colour: String,
+}
+
 fn main() {
     println!("Hello from connect 4!");
 
-    let empty_character = "-";
+    let game = Game {
+        board: Array2D::filled_with(BoardState::Empty, 6, 7),
+        empty_character: "-".into(),
+    };
 
-    // Create a new 2d array
-    let game_board = Array2D::filled_with(empty_character, 6, 7);
-    println!("{:?}", game_board)
+    for row_index in 0..game.board.num_rows() {
+        for col_index in 0..game.board.num_columns() {
+            print!("{:?}", game.board[(row_index, col_index)])
+        }
+        println!();
+    }
 }
