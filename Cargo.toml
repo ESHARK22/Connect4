@@ -5,3 +5,4 @@ edition = "2021"
 
 [dependencies]
 array2d = "0.3.2"
+inline_colorization = "0.1.6"

@@ -1,4 +1,5 @@
 use array2d::Array2D;
+use inline_colorization::*;
 
 // Connect 4 Rules - edited from https://rulesofplaying.com/connect-4-rules/
 //  - tic-tac-toe game played by two players.
@@ -43,4 +44,16 @@ fn main() {
         }
         println!();
     }
+
+    let player1 = Player {
+        name: "Player 1".into(),
+        character: "O".into(),
+        colour: format!("{bg_bright_yellow}").into(),
+    };
+
+    let player2 = Player {
+        name: "Player 2".into(),
+        character: "X".into(),
+        colour: format!("{bg_bright_red}").into(),
+    };
 }
