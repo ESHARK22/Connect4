@@ -122,7 +122,20 @@ fn check_diagnal_wins(board: Array2D<BoardState>) -> Option<Player> {
 }
 
 fn check_wins(board: Array2D<BoardState>) -> Option<Player> {
-    check_horizontal_wins(board.clone())
+    match check_horizontal_wins(board.clone()) {
+        Some(player) => return Some(player),
+        None => {}
+    }
+    match check_vertical_wins(board.clone()) {
+        Some(player) => return Some(player),
+        None => {}
+    }
+    match check_diagnal_wins(board.clone()) {
+        Some(player) => return Some(player),
+        None => {}
+    }
+
+    None
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 enum BoardState {
