@@ -200,7 +200,7 @@ fn check_diagnal_wins(board: Array2D<BoardState>) -> Option<Player> {
     let min_row_index = board.num_rows() - max_row_index;
     println!("{min_row_index}");
 
-    for x in (0..max_row_index).rev() {
+    for x in (min_row_index..=board.num_rows()).rev() {
         println!("{}", x);
     }
 
