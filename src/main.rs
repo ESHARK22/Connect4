@@ -92,7 +92,7 @@ fn check_horizontal_wins(board: Array2D<BoardState>) -> Option<Player> {
     // Check for 4 in a row, on all rows
     for row_index in 0..board.column_len() {
         // Check if x, x+1, x+2, and x+3 are all not empty
-        let max_col_index = board.row_len() - 4;
+        let max_col_index = board.row_len() - 3;
         for col_index in 0..max_col_index {
             let item1 = board.get(row_index, col_index).unwrap().clone();
             let item2 = board.get(row_index, col_index + 1).unwrap().clone();
