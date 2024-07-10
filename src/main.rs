@@ -94,16 +94,10 @@ fn check_horizontal_wins(board: Array2D<BoardState>) -> bool {
         // Check if x, x+1, x+2, and x+3 are all not empty
         let max_col_index = board.row_len() - 4;
         for col_index in 0..max_col_index {
-            let item1 = board.get(row_index, col_index);
-            let item2 = board.get(row_index, col_index + 1);
-            let item3 = board.get(row_index, col_index + 3);
-            let item4 = board.get(row_index, col_index + 3);
-
-            if item1.is_none() | item2.is_none() | item3.is_none() | item4.is_none() {
-                println!("({}, {})", col_index, row_index);
-                println!("{:?}, {:?}, {:?}, {:?}", item1, item2, item3, item4);
-                panic!("Tried checking a non-existent cell")
-            }
+            let item1 = board.get(row_index, col_index).unwrap();
+            let item2 = board.get(row_index, col_index + 1).unwrap();
+            let item3 = board.get(row_index, col_index + 3).unwrap();
+            let item4 = board.get(row_index, col_index + 3).unwrap();
         }
     }
 
