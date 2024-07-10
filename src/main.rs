@@ -162,14 +162,28 @@ fn check_diagnal_wins(board: Array2D<BoardState>) -> Option<Player> {
             let item3 = board.get(row_index + 2, col_index + 2).unwrap().clone();
             let item4 = board.get(row_index + 3, col_index + 3).unwrap().clone();
 
-            println!("{:?}", item1);
-            println!("{:?}", item2);
-            println!("{:?}", item3);
-            println!("{:?}", item4);
-            println!("{}", item1 == item1);
-            println!("{}", item1 == item2);
-            println!("{}", item1 == item3);
-            println!("{}", item1 == item4);
+            if let BoardState::Taken(player) = item1.clone() {
+                if item1 == item2 && item1 == item3 && item1 == item4 {
+                    return Some(player.clone());
+                }
+            } else {
+                // Empty space
+                continue;
+            }
+        }
+    }
+
+    // Now check for ones going from top right to bottom left
+    // For each row
+    for row_index in (0..max_row_index).rev() {
+        // For each column
+        for col_index in (0..max_col_index).rev() {
+            println!("Checking row: {} col: {}", row_index, col_index);
+
+            let item1 = board.get(row_index, col_index).unwrap().clone();
+            let item2 = board.get(row_index - 1, col_index - 1).unwrap().clone();
+            let item3 = board.get(row_index - 2, col_index - 2).unwrap().clone();
+            let item4 = board.get(row_index - 3, col_index - 3).unwrap().clone();
 
             if let BoardState::Taken(player) = item1.clone() {
                 if item1 == item2 && item1 == item3 && item1 == item4 {
