@@ -70,6 +70,20 @@ impl Game {
         }
         println!("+{style_reset}");
     }
+
+    fn is_at_bottom(self, row: usize, col: usize) -> bool {
+        match self.board.get(row - 1, col) {
+            Some(&ref state) => {
+                // There exists a place below!
+                // Checks if its already taken
+                match state {
+                    BoardState::Taken(_) => true, // Cant go any lower
+                    BoardState::Empty => false,   // Could have gone lower
+                }
+            }
+            None => true, // Nothing exists below it
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
