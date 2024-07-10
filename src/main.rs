@@ -124,14 +124,9 @@ fn check_vertical_wins(board: Array2D<BoardState>) -> Option<Player> {
     // How low down we can go, where the is still 4 items to check
     let max_row_index = board.num_columns() - 4;
 
-    println!("Num rows: {}", board.num_rows());
-    println!("Num cols: {}", board.num_columns());
-    println!("Max row index: {}", max_row_index);
-
     // For each column
     for col_index in 0..board.num_columns() {
         for row_index in 0..max_row_index {
-            println!("Checking row: {}, col: {}", row_index, col_index);
             let item1 = board.get(row_index, col_index).unwrap().clone();
             let item2 = board.get(row_index + 1, col_index).unwrap().clone();
             let item3 = board.get(row_index + 2, col_index).unwrap().clone();
