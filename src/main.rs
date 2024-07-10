@@ -94,10 +94,18 @@ fn check_horizontal_wins(board: Array2D<BoardState>) -> bool {
         // Check if x, x+1, x+2, and x+3 are all not empty
         let max_col_index = board.row_len() - 4;
         for col_index in 0..max_col_index {
-            let item1 = board.get(row_index, col_index).unwrap();
-            let item2 = board.get(row_index, col_index + 1).unwrap();
-            let item3 = board.get(row_index, col_index + 3).unwrap();
-            let item4 = board.get(row_index, col_index + 3).unwrap();
+            let item1 = board.get(row_index, col_index).unwrap().clone();
+            let item2 = board.get(row_index, col_index + 1).unwrap().clone();
+            let item3 = board.get(row_index, col_index + 3).unwrap().clone();
+            let item4 = board.get(row_index, col_index + 3).unwrap().clone();
+            if let BoardState::Taken(player) = item1 {
+                if item1 == item2 & item1 = item3 & item1 = item4 {
+                    println!("WOO A WIN")
+                }
+            } else {
+                // Empty space
+                continue;
+            }
         }
     }
 
