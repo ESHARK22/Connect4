@@ -88,6 +88,21 @@ fn is_at_bottom(board: Array2D<BoardState>, row: usize, col: usize) -> bool {
     }
 }
 
+fn check_horizontal_wins(board: Array2D<BoardState>) -> bool {
+    false
+}
+
+fn check_vertical_wins(board: Array2D<BoardState>) -> bool {
+    false
+}
+
+fn check_diagnal_wins(board: Array2D<BoardState>) -> bool {
+    false
+}
+
+fn check_wins(board: Array2D<BoardState>) -> bool {
+    check_horizontal_wins(board.clone())
+}
 #[derive(Debug, Clone)]
 enum BoardState {
     Taken(Player),
@@ -131,9 +146,9 @@ impl Player {
                         board[(row_index, col_index)] = BoardState::Taken(self.clone());
                         return;
                     }
-                    BoardState::Taken(player) => {
-                        println!("That space is already taken by {}!", player.name);
-                        println!("Try again...");
+                    BoardState::Taken(_) => {
+                        println!("That column is already full!");
+                        println!("Try a different one...");
                     }
                 },
                 None => {
