@@ -90,9 +90,12 @@ fn is_at_bottom(board: Array2D<BoardState>, row: usize, col: usize) -> bool {
 
 fn check_horizontal_wins(board: Array2D<BoardState>) -> Option<Player> {
     // Check for 4 in a row, on all rows
+
+    let max_col_index = board.row_len() - 3; // As close to the right as we can check for 4 in a row
+
+    // For each row
     for row_index in 0..board.column_len() {
         // Check if x, x+1, x+2, and x+3 are all not empty
-        let max_col_index = board.row_len() - 3;
         for col_index in 0..max_col_index {
             let item1 = board.get(row_index, col_index).unwrap().clone();
             let item2 = board.get(row_index, col_index + 1).unwrap().clone();
@@ -114,6 +117,33 @@ fn check_horizontal_wins(board: Array2D<BoardState>) -> Option<Player> {
 }
 
 fn check_vertical_wins(board: Array2D<BoardState>) -> Option<Player> {
+    // How low down we can go, where the is still 4 items to check
+    let max_row_index = board.num_columns() - 4;
+
+    println!("Num rows: {}", board.num_rows());
+    println!("Num cols: {}", board.num_columns());
+    println!("Max row index: {}", max_row_index);
+
+    // For each column
+    for col_index in 0..board.num_columns() {
+        for row_index in 0..max_row_index {
+            println!("Checking row: {}, col: {}", row_index, col_index);
+            let item1 = board.get(row_index, col_index).unwrap().clone();
+            let item2 = board.get(row_index + 1, col_index).unwrap().clone();
+            let item3 = board.get(row_index + 2, col_index).unwrap().clone();
+            let item4 = board.get(row_index + 3, col_index).unwrap().clone();
+
+            if let BoardState::Taken(player) = item1.clone() {
+                if item1 == item2 && item1 == item3 && item1 == item4 {
+                    return Some(player.clone());
+                }
+            } else {
+                // Empty space
+                continue;
+            }
+        }
+    }
+
     None
 }
 
