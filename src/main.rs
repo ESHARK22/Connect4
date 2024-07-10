@@ -178,7 +178,11 @@ fn check_diagnal_wins(board: Array2D<BoardState>) -> Option<Player> {
 
     println!("{min_row_index}");
 
-    for row_index in (min_row_index..=board.num_rows()).rev() {}
+    for row_index in (min_row_index..=board.num_rows()).rev() {
+        for col_index in (min_col_index..=board.num_columns()).rev() {
+            println!("Checking row: {} col: {}", row_index, col_index);
+        }
+    }
 
     None
 }
