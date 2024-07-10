@@ -155,6 +155,8 @@ fn check_diagnal_wins(board: Array2D<BoardState>) -> Option<Player> {
     for row_index in 0..max_row_index {
         // For each column
         for col_index in 0..max_col_index {
+            println!("Checking row: {} col: {}", row_index, col_index);
+
             let item1 = board.get(row_index, col_index).unwrap().clone();
             let item2 = board.get(row_index + 1, col_index + 1).unwrap().clone();
             let item3 = board.get(row_index + 2, col_index + 3).unwrap().clone();
