@@ -25,24 +25,50 @@ impl Game {
 
         let board = &self.board;
         let empty_char = &self.empty_character;
-        // Print each row, then a new line
+
+        // Print the top table lablelling (0, 1, 2..)
+        print!("    ");
+        for col_index in 0..board.num_columns() {
+            print!(" {col_index} ")
+        }
+        println!("[x] {style_reset}");
+
+        // Print the top table formattings (+ - - - +)
+        print!("{color_green}   +");
+        for _ in 0..board.num_columns() {
+            print!("---")
+        }
+        println!("+{style_reset}");
+
+        // Print each row, labelled
         for row_index in 0..board.num_rows() {
+            // The row lablelling
+            print!(" {row_index} {color_green}|{style_reset}");
+
             for col_index in 0..board.num_columns() {
+                // Print each section of the board, with the users colour, or none if its empty
                 let state = board.get(row_index, col_index);
                 match state {
+                    None => panic!("Tried to print a space that doesnt exist?!"),
                     Some(state) => match state {
                         BoardState::Empty => {
-                            print!("{}", empty_char)
+                            print!("{} {} {}", color_white, "-", style_reset)
                         }
                         BoardState::Taken(player) => {
-                            print!("{}", player.character)
+                            print!("{} {} {}", player.colour, player.character, style_reset)
                         }
                     },
-                    None => panic!("Tried to print a space that doesnt exist?!"),
                 }
             }
-            println!();
+            println!("{color_green}|{style_reset}")
         }
+
+        // Print the bottom table formattings (+ - - - +)
+        print!("{style_reset}[y]{color_green}+");
+        for _ in 0..board.num_columns() {
+            print!("---")
+        }
+        println!("+{style_reset}");
     }
 }
 
