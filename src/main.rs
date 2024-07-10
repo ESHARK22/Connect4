@@ -100,7 +100,7 @@ fn check_horizontal_wins(board: Array2D<BoardState>) -> bool {
             let item4 = board.get(row_index, col_index + 3).unwrap().clone();
             if let BoardState::Taken(player) = item1.clone() {
                 if item1 == item2 && item1 == item3 && item1 == item4 {
-                    println!("WOO A WIN")
+                    return true;
                 }
             } else {
                 // Empty space
