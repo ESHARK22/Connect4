@@ -38,7 +38,7 @@ impl Game {
                             print!("{}", player.character)
                         }
                     },
-                    None => panic!("AHH, Stop trying and play outside the box!"),
+                    None => panic!("Tried to print a space that doesnt exist?!"),
                 }
             }
             println!();
