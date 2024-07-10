@@ -89,6 +89,24 @@ fn is_at_bottom(board: Array2D<BoardState>, row: usize, col: usize) -> bool {
 }
 
 fn check_horizontal_wins(board: Array2D<BoardState>) -> bool {
+    // Check for 4 in a row, on all rows
+    for row_index in 0..board.column_len() {
+        // Check if x, x+1, x+2, and x+3 are all not empty
+        let max_col_index = board.row_len() - 4;
+        for col_index in 0..max_col_index {
+            let item1 = board.get(row_index, col_index);
+            let item2 = board.get(row_index, col_index + 1);
+            let item3 = board.get(row_index, col_index + 3);
+            let item4 = board.get(row_index, col_index + 3);
+
+            if item1.is_none() | item2.is_none() | item3.is_none() | item4.is_none() {
+                println!("({}, {})", col_index, row_index);
+                println!("{:?}, {:?}, {:?}, {:?}", item1, item2, item3, item4);
+                panic!("Tried checking a non-existent cell")
+            }
+        }
+    }
+
     false
 }
 
@@ -184,7 +202,11 @@ fn main() {
         game.print_board();
         player1.clone().play_turn(&mut game);
         println!("");
+        check_wins(game.board.clone());
+
         game.print_board();
         player2.clone().play_turn(&mut game);
+        check_wins(game.board.clone());
+        println!("");
     }
 }
