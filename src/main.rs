@@ -73,6 +73,7 @@ impl Game {
     }
 }
 
+// TODO: Move this back into the impl game
 fn is_at_bottom(board: Array2D<BoardState>, row: usize, col: usize) -> bool {
     match board.get(row + 1, col) {
         Some(&ref state) => {
@@ -156,13 +157,13 @@ fn main() {
     let player1 = Player {
         name: "Player 1".into(),
         character: "O".into(),
-        colour: format!("{bg_bright_yellow}").into(),
+        colour: format!("{color_bright_yellow}").into(),
     };
 
     let player2 = Player {
         name: "Player 2".into(),
         character: "X".into(),
-        colour: format!("{bg_bright_red}").into(),
+        colour: format!("{color_bright_red}").into(),
     };
     loop {
         game.print_board();
