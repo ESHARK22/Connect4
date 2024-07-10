@@ -52,7 +52,7 @@ impl Game {
                     None => panic!("Tried to print a space that doesnt exist?!"),
                     Some(state) => match state {
                         BoardState::Empty => {
-                            print!("{} {} {}", color_white, "-", style_reset)
+                            print!("{} {} {}", color_white, empty_char, style_reset)
                         }
                         BoardState::Taken(player) => {
                             print!("{} {} {}", player.colour, player.character, style_reset)
