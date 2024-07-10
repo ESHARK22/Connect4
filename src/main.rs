@@ -98,8 +98,17 @@ fn check_horizontal_wins(board: Array2D<BoardState>) -> Option<Player> {
             let item2 = board.get(row_index, col_index + 1).unwrap().clone();
             let item3 = board.get(row_index, col_index + 3).unwrap().clone();
             let item4 = board.get(row_index, col_index + 3).unwrap().clone();
+
             if let BoardState::Taken(player) = item1.clone() {
                 if item1 == item2 && item1 == item3 && item1 == item4 {
+                    println!("{:?}", item1);
+                    println!("{:?}", item2);
+                    println!("{:?}", item3);
+                    println!("{:?}", item4);
+                    println!("{}", item1 == item1);
+                    println!("{}", item1 == item2);
+                    println!("{}", item1 == item3);
+                    println!("{}", item1 == item4);
                     return Some(player.clone());
                 }
             } else {
@@ -123,13 +132,13 @@ fn check_diagnal_wins(board: Array2D<BoardState>) -> Option<Player> {
 fn check_wins(board: Array2D<BoardState>) -> Option<Player> {
     check_horizontal_wins(board.clone())
 }
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 enum BoardState {
     Taken(Player),
     Empty,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 struct Player {
     name: String,
     character: String,
