@@ -173,36 +173,12 @@ fn check_diagnal_wins(board: Array2D<BoardState>) -> Option<Player> {
         }
     }
 
-    // Now check for ones going from top right to bottom left
-    // For each row
-    // for row_index in (0..max_row_index).rev() {
-    //     // For each column
-    //     for col_index in (0..max_col_index).rev() {
-    //         println!("Checking row: {} col: {}", row_index, col_index);
-
-    //         let item1 = board.get(row_index, col_index).unwrap().clone();
-    //         let item2 = board.get(row_index - 1, col_index - 1).unwrap().clone();
-    //         let item3 = board.get(row_index - 2, col_index - 2).unwrap().clone();
-    //         let item4 = board.get(row_index - 3, col_index - 3).unwrap().clone();
-
-    //         if let BoardState::Taken(player) = item1.clone() {
-    //             if item1 == item2 && item1 == item3 && item1 == item4 {
-    //                 return Some(player.clone());
-    //             }
-    //         } else {
-    //             // Empty space
-    //             continue;
-    //         }
-    //     }
-    // }
-    //
-
     let min_row_index = board.num_rows() - max_row_index;
+    let min_col_index = board.num_columns() - max_col_index;
+
     println!("{min_row_index}");
 
-    for x in (min_row_index..=board.num_rows()).rev() {
-        println!("{}", x);
-    }
+    for row_index in (min_row_index..=board.num_rows()).rev() {}
 
     None
 }
