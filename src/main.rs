@@ -204,11 +204,30 @@ fn main() {
         game.print_board();
         player1.clone().play_turn(&mut game);
         println!("");
-        check_wins(game.board.clone());
+        match check_wins(game.board.clone()) {
+            None => {}
+            Some(player) => {
+                game.print_board();
+                let player_name = player.name;
+                println!("__________________________");
+                println!("{player_name} won the game!!!");
+                return;
+            }
+        }
 
         game.print_board();
         player2.clone().play_turn(&mut game);
         check_wins(game.board.clone());
         println!("");
+        match check_wins(game.board.clone()) {
+            None => {}
+            Some(player) => {
+                game.print_board();
+                let player_name = player.name;
+                println!("__________________________");
+                println!("{player_name} won the game!!!");
+                return;
+            }
+        }
     }
 }
