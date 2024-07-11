@@ -73,6 +73,7 @@ impl Game {
     }
 }
 
+// TODO: Move this back into the impl game
 fn is_at_bottom(board: Array2D<BoardState>, row: usize, col: usize) -> bool {
     match board.get(row + 1, col) {
         Some(&ref state) => {
@@ -87,13 +88,49 @@ fn is_at_bottom(board: Array2D<BoardState>, row: usize, col: usize) -> bool {
     }
 }
 
-#[derive(Debug, Clone)]
+fn check_horizontal_wins(board: Array2D<BoardState>) -> Option<Player> {
+    // Check for 4 in a row, on all rows
+    for row_index in 0..board.column_len() {
+        // Check if x, x+1, x+2, and x+3 are all not empty
+        let max_col_index = board.row_len() - 3;
+        for col_index in 0..max_col_index {
+            let item1 = board.get(row_index, col_index).unwrap().clone();
+            let item2 = board.get(row_index, col_index + 1).unwrap().clone();
+            let item3 = board.get(row_index, col_index + 2).unwrap().clone();
+            let item4 = board.get(row_index, col_index + 3).unwrap().clone();
+
+            if let BoardState::Taken(player) = item1.clone() {
+                if item1 == item2 && item1 == item3 && item1 == item4 {
+                    return Some(player.clone());
+                }
+            } else {
+                // Empty space
+                continue;
+            }
+        }
+    }
+
+    None
+}
+
+fn check_vertical_wins(board: Array2D<BoardState>) -> Option<Player> {
+    None
+}
+
+fn check_diagnal_wins(board: Array2D<BoardState>) -> Option<Player> {
+    None
+}
+
+fn check_wins(board: Array2D<BoardState>) -> Option<Player> {
+    check_horizontal_wins(board.clone())
+}
+#[derive(Debug, Clone, PartialEq, Eq)]
 enum BoardState {
     Taken(Player),
     Empty,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 struct Player {
     name: String,
     character: String,
@@ -130,9 +167,9 @@ impl Player {
                         board[(row_index, col_index)] = BoardState::Taken(self.clone());
                         return;
                     }
-                    BoardState::Taken(player) => {
-                        println!("That space is already taken by {}!", player.name);
-                        println!("Try again...");
+                    BoardState::Taken(_) => {
+                        println!("That column is already full!");
+                        println!("Try a different one...");
                     }
                 },
                 None => {
@@ -156,19 +193,42 @@ fn main() {
     let player1 = Player {
         name: "Player 1".into(),
         character: "O".into(),
-        colour: format!("{bg_bright_yellow}").into(),
+        colour: format!("{color_bright_yellow}").into(),
     };
 
     let player2 = Player {
         name: "Player 2".into(),
         character: "X".into(),
-        colour: format!("{bg_bright_red}").into(),
+        colour: format!("{color_bright_red}").into(),
     };
     loop {
         game.print_board();
         player1.clone().play_turn(&mut game);
         println!("");
+        match check_wins(game.board.clone()) {
+            None => {}
+            Some(player) => {
+                game.print_board();
+                let player_name = player.name;
+                println!("__________________________");
+                println!("{player_name} won the game!!!");
+                return;
+            }
+        }
+
         game.print_board();
         player2.clone().play_turn(&mut game);
+        check_wins(game.board.clone());
+        println!("");
+        match check_wins(game.board.clone()) {
+            None => {}
+            Some(player) => {
+                game.print_board();
+                let player_name = player.name;
+                println!("__________________________");
+                println!("{player_name} won the game!!!");
+                return;
+            }
+        }
     }
 }
