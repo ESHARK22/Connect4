@@ -305,8 +305,6 @@ fn main() {
         colour: format!("{color_bright_red}").into(),
     };
 
-    let players = [player1.clone(), player2.clone()];
-
     let mut game = Game {
         board: Array2D::filled_with(BoardState::Empty, 6, 7),
         empty_character: "-".into(),
