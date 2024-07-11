@@ -226,7 +226,7 @@ fn check_wins(board: Array2D<BoardState>) -> Option<Player> {
 
 fn check_tie(board: Array2D<BoardState>) -> bool {
     // Check if there are no more empty spaces
-    board
+    !board
         .elements_row_major_iter()
         .any(|f| f == &BoardState::Empty)
 }
