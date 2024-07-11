@@ -300,33 +300,23 @@ fn main() {
         character: "X".into(),
         colour: format!("{color_bright_red}").into(),
     };
-    loop {
-        game.print_board();
-        player1.clone().play_turn(&mut game);
-        println!("");
-        match check_wins(game.board.clone()) {
-            None => {}
-            Some(player) => {
-                game.print_board();
-                let player_name = player.name;
-                println!("__________________________");
-                println!("{player_name} won the game!!!");
-                return;
-            }
-        }
 
-        game.print_board();
-        player2.clone().play_turn(&mut game);
-        check_wins(game.board.clone());
-        println!("");
-        match check_wins(game.board.clone()) {
-            None => {}
-            Some(player) => {
-                game.print_board();
-                let player_name = player.name;
-                println!("__________________________");
-                println!("{player_name} won the game!!!");
-                return;
+    let players = [player1, player2];
+
+    loop {
+        for player in players.iter() {
+            game.print_board();
+            player.clone().play_turn(&mut game);
+            println!("");
+            match check_wins(game.board.clone()) {
+                None => {}
+                Some(player) => {
+                    game.print_board();
+                    let player_name = player.name;
+                    println!("__________________________");
+                    println!("{player_name} won the game!!!");
+                    return;
+                }
             }
         }
     }
