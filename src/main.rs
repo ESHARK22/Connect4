@@ -19,17 +19,24 @@ use input_handlers::{input, int_input};
 #[derive(Debug, Clone)]
 struct Game {
     name: String,
-    board: Array2D<BoardState>,
+    board: Board,
     empty_character: String,
     player_turn: PlayerTurn,
 }
 impl Game {
-    fn print_board(&self) {
+    fn next_player(&mut self) {
+        match self.player_turn {
+            PlayerTurn::Player1 => self.player_turn = PlayerTurn::Player2,
+            PlayerTurn::Player2 => self.player_turn = PlayerTurn::Player1,
+        }
+    }
+}
+#[derive(Debug, Clone)]
+struct Board(Array2D<BoardState>);
+impl Board {
+    fn print(&self, empty_char: String) {
         // Simply prints the board.
-
-        let board = &self.board;
-        let empty_char = &self.empty_character;
-
+        let board = &self.0;
         // Print the top table lablelling (0, 1, 2..)
         print!("    ");
         for col_index in 0..board.num_columns() {
@@ -73,13 +80,6 @@ impl Game {
             print!("---")
         }
         println!("+{style_reset}");
-    }
-
-    fn next_player(&mut self) {
-        match self.player_turn {
-            PlayerTurn::Player1 => self.player_turn = PlayerTurn::Player2,
-            PlayerTurn::Player2 => self.player_turn = PlayerTurn::Player1,
-        }
     }
 }
 
@@ -221,9 +221,10 @@ fn check_wins(board: Array2D<BoardState>) -> Option<Player> {
     None
 }
 
-fn check_tie(board: Array2D<BoardState>) -> bool {
+fn check_tie(board: Board) -> bool {
     // Check if there are no more empty spaces
     !board
+        .0
         .elements_row_major_iter()
         .any(|f| f == &BoardState::Empty)
 }
@@ -248,7 +249,7 @@ struct Player {
 }
 impl Player {
     fn play_turn(self, game: &mut Game) {
-        let board = &mut game.board;
+        let board = &mut game.board.0;
         let name = self.name.clone();
         loop {
             let mut col_index: usize;
@@ -309,7 +310,7 @@ fn new_game() {
 
     let mut game = Game {
         name: game_name,
-        board: Array2D::filled_with(BoardState::Empty, 6, 7),
+        board: Board(Array2D::filled_with(BoardState::Empty, 6, 7)),
         empty_character: "-".into(),
         player_turn: PlayerTurn::Player1,
     };
@@ -320,14 +321,14 @@ fn new_game() {
             PlayerTurn::Player1 => player = player1.clone(),
             PlayerTurn::Player2 => player = player2.clone(),
         }
-        game.print_board();
+        game.board.print(game.empty_character.clone());
         player.clone().play_turn(&mut game);
         println!("");
 
-        match check_wins(game.board.clone()) {
+        match check_wins(game.board.0.clone()) {
             None => {}
             Some(player) => {
-                game.print_board();
+                game.board.print(game.empty_character.clone());
                 let player_name = player.name;
                 println!("__________________________");
                 println!("{player_name} won the game!!!");
