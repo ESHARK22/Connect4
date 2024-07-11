@@ -308,6 +308,7 @@ fn main() {
             game.print_board();
             player.clone().play_turn(&mut game);
             println!("");
+
             match check_wins(game.board.clone()) {
                 None => {}
                 Some(player) => {
@@ -315,6 +316,15 @@ fn main() {
                     let player_name = player.name;
                     println!("__________________________");
                     println!("{player_name} won the game!!!");
+                    return;
+                }
+            }
+
+            match check_tie(game.board.clone()) {
+                false => {}
+                true => {
+                    println!("__________________________");
+                    println!("The game is a tie!!!");
                     return;
                 }
             }
