@@ -163,8 +163,6 @@ fn check_diagnal_wins(board: Array2D<BoardState>) -> Option<Player> {
     for row_index in 0..max_row_index {
         // For each column
         for col_index in 0..max_col_index {
-            println!("Checking row: {} col: {}", row_index, col_index);
-
             let item1 = board.get(row_index, col_index).unwrap().clone();
             let item2 = board.get(row_index + 1, col_index + 1).unwrap().clone();
             let item3 = board.get(row_index + 2, col_index + 2).unwrap().clone();
@@ -180,14 +178,11 @@ fn check_diagnal_wins(board: Array2D<BoardState>) -> Option<Player> {
             }
         }
     }
-    println!("L-> R Checks...");
 
     let min_col_index = board.num_columns() - max_col_index;
 
     for row_index in 0..max_row_index {
         for col_index in (min_col_index..board.num_columns()).rev() {
-            println!("Checking row: {} col: {}", row_index, col_index);
-
             let item1 = board.get(row_index, col_index).unwrap().clone();
             let item2 = board.get(row_index + 1, col_index - 1).unwrap().clone();
             let item3 = board.get(row_index + 2, col_index - 2).unwrap().clone();
