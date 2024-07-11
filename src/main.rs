@@ -172,6 +172,7 @@ fn check_diagnal_wins(board: Array2D<BoardState>) -> Option<Player> {
             }
         }
     }
+    println!("L-> R Checks...");
 
     let min_col_index = board.num_columns() - max_col_index;
 
