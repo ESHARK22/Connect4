@@ -1,8 +1,9 @@
 use array2d::Array2D;
+use dialoguer::{theme::ColorfulTheme, Select};
 use inline_colorization::*;
 
 mod input_handlers;
-use input_handlers::int_input;
+use input_handlers::{input, int_input};
 
 // Connect 4 Rules - edited from https://rulesofplaying.com/connect-4-rules/
 //  - tic-tac-toe game played by two players.
@@ -17,6 +18,7 @@ use input_handlers::int_input;
 
 #[derive(Debug, Clone)]
 struct Game {
+    name: String,
     board: Array2D<BoardState>,
     empty_character: String,
     player_turn: PlayerTurn,
@@ -290,8 +292,8 @@ impl Player {
     }
 }
 
-fn main() {
-    println!("Hello from connect 4!");
+fn new_game() {
+    let game_name = input("What would you like to call this game save?");
 
     let player1 = Player {
         name: "Player 1".into(),
@@ -306,6 +308,7 @@ fn main() {
     };
 
     let mut game = Game {
+        name: game_name,
         board: Array2D::filled_with(BoardState::Empty, 6, 7),
         empty_character: "-".into(),
         player_turn: PlayerTurn::Player1,
@@ -341,5 +344,23 @@ fn main() {
             }
         }
         game.next_player();
+    }
+}
+
+fn load_game() {}
+
+fn main() {
+    let options = &["Start a new game", "Load a game save"];
+    let selection = Select::with_theme(&ColorfulTheme::default())
+        .with_prompt("What would you like to do?")
+        .default(0)
+        .items(&options[..])
+        .interact()
+        .unwrap();
+
+    match selection {
+        0 => new_game(),
+        1 => load_game(),
+        _ => panic!("What menu item did you click?"),
     }
 }
