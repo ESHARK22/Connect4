@@ -30,6 +30,9 @@ impl Game {
             PlayerTurn::Player2 => self.player_turn = PlayerTurn::Player1,
         }
     }
+    fn print_board(&self) {
+        self.board.print(self.empty_character.clone());
+    }
 }
 #[derive(Debug, Clone)]
 struct Board(Array2D<BoardState>);
@@ -80,6 +83,13 @@ impl Board {
             print!("---")
         }
         println!("+{style_reset}");
+    }
+    fn is_full(&self) -> bool {
+        // The board is full where there are no more empty spaces
+        !self
+            .0
+            .elements_row_major_iter()
+            .any(|f| f == &BoardState::Empty)
     }
 }
 
@@ -222,11 +232,7 @@ fn check_wins(board: Array2D<BoardState>) -> Option<Player> {
 }
 
 fn check_tie(board: Board) -> bool {
-    // Check if there are no more empty spaces
-    !board
-        .0
-        .elements_row_major_iter()
-        .any(|f| f == &BoardState::Empty)
+    board.is_full()
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -321,14 +327,14 @@ fn new_game() {
             PlayerTurn::Player1 => player = player1.clone(),
             PlayerTurn::Player2 => player = player2.clone(),
         }
-        game.board.print(game.empty_character.clone());
+        game.print_board();
         player.clone().play_turn(&mut game);
         println!("");
 
         match check_wins(game.board.0.clone()) {
             None => {}
             Some(player) => {
-                game.board.print(game.empty_character.clone());
+                game.print_board();
                 let player_name = player.name;
                 println!("__________________________");
                 println!("{player_name} won the game!!!");
