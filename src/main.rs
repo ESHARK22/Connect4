@@ -19,6 +19,7 @@ use input_handlers::int_input;
 struct Game {
     board: Array2D<BoardState>,
     empty_character: String,
+    player_turn: PlayerTurn,
 }
 impl Game {
     fn print_board(&self) {
@@ -70,6 +71,13 @@ impl Game {
             print!("---")
         }
         println!("+{style_reset}");
+    }
+
+    fn next_player(&mut self) {
+        match self.player_turn {
+            PlayerTurn::Player1 => self.player_turn = PlayerTurn::Player2,
+            PlayerTurn::Player2 => self.player_turn = PlayerTurn::Player1,
+        }
     }
 }
 
@@ -229,6 +237,12 @@ enum BoardState {
     Empty,
 }
 
+#[derive(Debug, Clone)]
+enum PlayerTurn {
+    Player1,
+    Player2,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 struct Player {
     name: String,
@@ -284,11 +298,6 @@ impl Player {
 fn main() {
     println!("Hello from connect 4!");
 
-    let mut game = Game {
-        board: Array2D::filled_with(BoardState::Empty, 6, 7),
-        empty_character: "-".into(),
-    };
-
     let player1 = Player {
         name: "Player 1".into(),
         character: "O".into(),
@@ -301,33 +310,43 @@ fn main() {
         colour: format!("{color_bright_red}").into(),
     };
 
-    let players = [player1, player2];
+    let players = [player1.clone(), player2.clone()];
+
+    let mut game = Game {
+        board: Array2D::filled_with(BoardState::Empty, 6, 7),
+        empty_character: "-".into(),
+        player_turn: PlayerTurn::Player1,
+    };
 
     loop {
-        for player in players.iter() {
-            game.print_board();
-            player.clone().play_turn(&mut game);
-            println!("");
+        let player: Player;
+        match game.player_turn {
+            PlayerTurn::Player1 => player = player1.clone(),
+            PlayerTurn::Player2 => player = player2.clone(),
+        }
+        game.print_board();
+        player.clone().play_turn(&mut game);
+        println!("");
 
-            match check_wins(game.board.clone()) {
-                None => {}
-                Some(player) => {
-                    game.print_board();
-                    let player_name = player.name;
-                    println!("__________________________");
-                    println!("{player_name} won the game!!!");
-                    return;
-                }
-            }
-
-            match check_tie(game.board.clone()) {
-                false => {}
-                true => {
-                    println!("__________________________");
-                    println!("The game is a tie!!!");
-                    return;
-                }
+        match check_wins(game.board.clone()) {
+            None => {}
+            Some(player) => {
+                game.print_board();
+                let player_name = player.name;
+                println!("__________________________");
+                println!("{player_name} won the game!!!");
+                return;
             }
         }
+
+        match check_tie(game.board.clone()) {
+            false => {}
+            true => {
+                println!("__________________________");
+                println!("The game is a tie!!!");
+                return;
+            }
+        }
+        game.next_player();
     }
 }
