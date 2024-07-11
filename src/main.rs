@@ -40,6 +40,7 @@ impl Board {
     fn print(&self, empty_char: String) {
         // Simply prints the board, with formatting, and colours.
 
+        // A reference to the 2d array
         let board = &self.0;
 
         // Print the top table lablelling
@@ -91,26 +92,25 @@ impl Board {
         println!("+{style_reset}");
     }
     fn is_full(&self) -> bool {
-        // The board is full where there are no more empty spaces
+        // The board is full when there are no more empty spaces
         !self
             .0
             .elements_row_major_iter()
             .any(|f| f == &BoardState::Empty)
     }
-}
-
-// TODO: Move this back into the impl game
-fn is_at_bottom(board: Array2D<BoardState>, row: usize, col: usize) -> bool {
-    match board.get(row + 1, col) {
-        Some(&ref state) => {
-            // There exists a place below!
-            // Checks if its already taken
-            match state {
-                BoardState::Taken(_) => true, // Cant go any lower
-                BoardState::Empty => false,   // Could have gone lower
+    fn is_at_bottom(&self, row: usize, column: usize) -> bool {
+        let board = &self.0;
+        // Check if anything exists below, and if it does, make sure it is not empty
+        // If it is empty, then we are not at the bottom
+        match board.get(row + 1, column) {
+            Some(&ref state) => {
+                match state {
+                    BoardState::Taken(_) => true, // Cant go any lower
+                    BoardState::Empty => false,   // Could have gone lower
+                }
             }
+            None => true, // Nothing exists below it
         }
-        None => true, // Nothing exists below it
     }
 }
 
