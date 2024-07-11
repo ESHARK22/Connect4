@@ -38,9 +38,12 @@ impl Game {
 struct Board(Array2D<BoardState>);
 impl Board {
     fn print(&self, empty_char: String) {
-        // Simply prints the board.
+        // Simply prints the board, with formatting, and colours.
+
         let board = &self.0;
-        // Print the top table lablelling (0, 1, 2..)
+
+        // Print the top table lablelling
+        // ->      0  1  2  3  4  5  6 [x]
         print!("    ");
         for col_index in 0..board.num_columns() {
             print!(" {col_index} ")
@@ -48,6 +51,7 @@ impl Board {
         println!("[x] {style_reset}");
 
         // Print the top table formattings (+ - - - +)
+        // ->    +---------------------+
         print!("{color_green}   +");
         for _ in 0..board.num_columns() {
             print!("---")
@@ -55,6 +59,7 @@ impl Board {
         println!("+{style_reset}");
 
         // Print each row, labelled
+        // ->  5 | -  -  X  -  -  O  - |
         for row_index in 0..board.num_rows() {
             // The row lablelling
             print!(" {row_index} {color_green}|{style_reset}");
@@ -77,7 +82,8 @@ impl Board {
             println!("{color_green}|{style_reset}")
         }
 
-        // Print the bottom table formattings (+ - - - +)
+        // Print the bottom table formattings
+        // -> [y]+---------------------+
         print!("{style_reset}[y]{color_green}+");
         for _ in 0..board.num_columns() {
             print!("---")
