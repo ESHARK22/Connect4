@@ -261,14 +261,16 @@ struct Player {
 }
 impl Player {
     fn play_turn(self, game: &mut Game) {
-        let board = &mut game.board.0;
+        let board = game.board.clone();
+        let board_arr = &mut game.board.0;
         let name = self.name.clone();
+
         loop {
             let mut col_index: usize;
             loop {
                 println!("It is {}'s turn!", name);
                 col_index = int_input("Enter the column you would like to go in: ");
-                let current_state = board.get_mut(0, col_index); // Start at the top
+                let current_state = board_arr.get_mut(0, col_index); // Start at the top
                 match current_state {
                     Some(_) => break, // It exists
                     None => {
@@ -279,15 +281,15 @@ impl Player {
             }
             // Find the lowest cords you can go to
             let mut row_index = 0;
-            while !is_at_bottom(board.clone(), row_index, col_index) {
+            while !board.is_at_bottom(row_index, col_index) {
                 row_index += 1
             }
 
-            let current_state = board.get_mut(row_index, col_index);
+            let current_state = board_arr.get_mut(row_index, col_index);
             match current_state {
                 Some(current_state) => match current_state {
                     BoardState::Empty => {
-                        board[(row_index, col_index)] = BoardState::Taken(self.clone());
+                        board_arr[(row_index, col_index)] = BoardState::Taken(self.clone());
                         return;
                     }
                     BoardState::Taken(_) => {
