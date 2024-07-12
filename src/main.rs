@@ -1,8 +1,9 @@
 use array2d::Array2D;
+use dialoguer::{theme::ColorfulTheme, Select};
 use inline_colorization::*;
 
 mod input_handlers;
-use input_handlers::int_input;
+use input_handlers::{input, int_input};
 
 // Connect 4 Rules - edited from https://rulesofplaying.com/connect-4-rules/
 //  - tic-tac-toe game played by two players.
@@ -17,8 +18,10 @@ use input_handlers::int_input;
 
 #[derive(Debug, Clone)]
 struct Game {
+    name: String,
     board: Array2D<BoardState>,
     empty_character: String,
+    player_turn: PlayerTurn,
 }
 impl Game {
     fn print_board(&self) {
@@ -70,6 +73,13 @@ impl Game {
             print!("---")
         }
         println!("+{style_reset}");
+    }
+
+    fn next_player(&mut self) {
+        match self.player_turn {
+            PlayerTurn::Player1 => self.player_turn = PlayerTurn::Player2,
+            PlayerTurn::Player2 => self.player_turn = PlayerTurn::Player1,
+        }
     }
 }
 
@@ -155,8 +165,6 @@ fn check_diagnal_wins(board: Array2D<BoardState>) -> Option<Player> {
     for row_index in 0..max_row_index {
         // For each column
         for col_index in 0..max_col_index {
-            println!("Checking row: {} col: {}", row_index, col_index);
-
             let item1 = board.get(row_index, col_index).unwrap().clone();
             let item2 = board.get(row_index + 1, col_index + 1).unwrap().clone();
             let item3 = board.get(row_index + 2, col_index + 2).unwrap().clone();
@@ -173,14 +181,23 @@ fn check_diagnal_wins(board: Array2D<BoardState>) -> Option<Player> {
         }
     }
 
-    let min_row_index = board.num_rows() - max_row_index;
     let min_col_index = board.num_columns() - max_col_index;
 
-    println!("{min_row_index}");
+    for row_index in 0..max_row_index {
+        for col_index in (min_col_index..board.num_columns()).rev() {
+            let item1 = board.get(row_index, col_index).unwrap().clone();
+            let item2 = board.get(row_index + 1, col_index - 1).unwrap().clone();
+            let item3 = board.get(row_index + 2, col_index - 2).unwrap().clone();
+            let item4 = board.get(row_index + 3, col_index - 3).unwrap().clone();
 
-    for row_index in (min_row_index..=board.num_rows()).rev() {
-        for col_index in (min_col_index..=board.num_columns()).rev() {
-            println!("Checking row: {} col: {}", row_index, col_index);
+            if let BoardState::Taken(player) = item1.clone() {
+                if item1 == item2 && item1 == item3 && item1 == item4 {
+                    return Some(player.clone());
+                }
+            } else {
+                // Empty space
+                continue;
+            }
         }
     }
 
@@ -203,10 +220,24 @@ fn check_wins(board: Array2D<BoardState>) -> Option<Player> {
 
     None
 }
+
+fn check_tie(board: Array2D<BoardState>) -> bool {
+    // Check if there are no more empty spaces
+    !board
+        .elements_row_major_iter()
+        .any(|f| f == &BoardState::Empty)
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 enum BoardState {
     Taken(Player),
     Empty,
+}
+
+#[derive(Debug, Clone)]
+enum PlayerTurn {
+    Player1,
+    Player2,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -261,13 +292,8 @@ impl Player {
     }
 }
 
-fn main() {
-    println!("Hello from connect 4!");
-
-    let mut game = Game {
-        board: Array2D::filled_with(BoardState::Empty, 6, 7),
-        empty_character: "-".into(),
-    };
+fn new_game() {
+    let game_name = input("What would you like to call this game save?");
 
     let player1 = Player {
         name: "Player 1".into(),
@@ -280,10 +306,24 @@ fn main() {
         character: "X".into(),
         colour: format!("{color_bright_red}").into(),
     };
+
+    let mut game = Game {
+        name: game_name,
+        board: Array2D::filled_with(BoardState::Empty, 6, 7),
+        empty_character: "-".into(),
+        player_turn: PlayerTurn::Player1,
+    };
+
     loop {
+        let player: Player;
+        match game.player_turn {
+            PlayerTurn::Player1 => player = player1.clone(),
+            PlayerTurn::Player2 => player = player2.clone(),
+        }
         game.print_board();
-        player1.clone().play_turn(&mut game);
+        player.clone().play_turn(&mut game);
         println!("");
+
         match check_wins(game.board.clone()) {
             None => {}
             Some(player) => {
@@ -295,19 +335,32 @@ fn main() {
             }
         }
 
-        game.print_board();
-        player2.clone().play_turn(&mut game);
-        check_wins(game.board.clone());
-        println!("");
-        match check_wins(game.board.clone()) {
-            None => {}
-            Some(player) => {
-                game.print_board();
-                let player_name = player.name;
+        match check_tie(game.board.clone()) {
+            false => {}
+            true => {
                 println!("__________________________");
-                println!("{player_name} won the game!!!");
+                println!("The game is a tie!!!");
                 return;
             }
         }
+        game.next_player();
+    }
+}
+
+fn load_game() {}
+
+fn main() {
+    let options = &["Start a new game", "Load a game save"];
+    let selection = Select::with_theme(&ColorfulTheme::default())
+        .with_prompt("What would you like to do?")
+        .default(0)
+        .items(&options[..])
+        .interact()
+        .unwrap();
+
+    match selection {
+        0 => new_game(),
+        1 => load_game(),
+        _ => panic!("What menu item did you click?"),
     }
 }
