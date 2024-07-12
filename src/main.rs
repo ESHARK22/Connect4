@@ -19,18 +19,32 @@ use input_handlers::{input, int_input};
 #[derive(Debug, Clone)]
 struct Game {
     name: String,
-    board: Array2D<BoardState>,
+    board: Board,
     empty_character: String,
     player_turn: PlayerTurn,
 }
 impl Game {
+    fn next_player(&mut self) {
+        match self.player_turn {
+            PlayerTurn::Player1 => self.player_turn = PlayerTurn::Player2,
+            PlayerTurn::Player2 => self.player_turn = PlayerTurn::Player1,
+        }
+    }
     fn print_board(&self) {
-        // Simply prints the board.
+        self.board.print(self.empty_character.clone());
+    }
+}
+#[derive(Debug, Clone)]
+struct Board(Array2D<BoardState>);
+impl Board {
+    fn print(&self, empty_char: String) {
+        // Simply prints the board, with formatting, and colours.
 
-        let board = &self.board;
-        let empty_char = &self.empty_character;
+        // A reference to the 2d array
+        let board = &self.0;
 
-        // Print the top table lablelling (0, 1, 2..)
+        // Print the top table lablelling
+        // ->      0  1  2  3  4  5  6 [x]
         print!("    ");
         for col_index in 0..board.num_columns() {
             print!(" {col_index} ")
@@ -38,6 +52,7 @@ impl Game {
         println!("[x] {style_reset}");
 
         // Print the top table formattings (+ - - - +)
+        // ->    +---------------------+
         print!("{color_green}   +");
         for _ in 0..board.num_columns() {
             print!("---")
@@ -45,6 +60,7 @@ impl Game {
         println!("+{style_reset}");
 
         // Print each row, labelled
+        // ->  5 | -  -  X  -  -  O  - |
         for row_index in 0..board.num_rows() {
             // The row lablelling
             print!(" {row_index} {color_green}|{style_reset}");
@@ -67,34 +83,34 @@ impl Game {
             println!("{color_green}|{style_reset}")
         }
 
-        // Print the bottom table formattings (+ - - - +)
+        // Print the bottom table formattings
+        // -> [y]+---------------------+
         print!("{style_reset}[y]{color_green}+");
         for _ in 0..board.num_columns() {
             print!("---")
         }
         println!("+{style_reset}");
     }
-
-    fn next_player(&mut self) {
-        match self.player_turn {
-            PlayerTurn::Player1 => self.player_turn = PlayerTurn::Player2,
-            PlayerTurn::Player2 => self.player_turn = PlayerTurn::Player1,
-        }
+    fn is_full(&self) -> bool {
+        // The board is full when there are no more empty spaces
+        !self
+            .0
+            .elements_row_major_iter()
+            .any(|f| f == &BoardState::Empty)
     }
-}
-
-// TODO: Move this back into the impl game
-fn is_at_bottom(board: Array2D<BoardState>, row: usize, col: usize) -> bool {
-    match board.get(row + 1, col) {
-        Some(&ref state) => {
-            // There exists a place below!
-            // Checks if its already taken
-            match state {
-                BoardState::Taken(_) => true, // Cant go any lower
-                BoardState::Empty => false,   // Could have gone lower
+    fn is_at_bottom(&self, row: usize, column: usize) -> bool {
+        let board = &self.0;
+        // Check if anything exists below, and if it does, make sure it is not empty
+        // If it is empty, then we are not at the bottom
+        match board.get(row + 1, column) {
+            Some(&ref state) => {
+                match state {
+                    BoardState::Taken(_) => true, // Cant go any lower
+                    BoardState::Empty => false,   // Could have gone lower
+                }
             }
+            None => true, // Nothing exists below it
         }
-        None => true, // Nothing exists below it
     }
 }
 
@@ -221,11 +237,8 @@ fn check_wins(board: Array2D<BoardState>) -> Option<Player> {
     None
 }
 
-fn check_tie(board: Array2D<BoardState>) -> bool {
-    // Check if there are no more empty spaces
-    !board
-        .elements_row_major_iter()
-        .any(|f| f == &BoardState::Empty)
+fn check_tie(board: Board) -> bool {
+    board.is_full()
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -248,7 +261,7 @@ struct Player {
 }
 impl Player {
     fn play_turn(self, game: &mut Game) {
-        let board = &mut game.board;
+        let board = &mut game.board.0;
         let name = self.name.clone();
         loop {
             let mut col_index: usize;
@@ -309,7 +322,7 @@ fn new_game() {
 
     let mut game = Game {
         name: game_name,
-        board: Array2D::filled_with(BoardState::Empty, 6, 7),
+        board: Board(Array2D::filled_with(BoardState::Empty, 6, 7)),
         empty_character: "-".into(),
         player_turn: PlayerTurn::Player1,
     };
@@ -324,7 +337,7 @@ fn new_game() {
         player.clone().play_turn(&mut game);
         println!("");
 
-        match check_wins(game.board.clone()) {
+        match check_wins(game.board.0.clone()) {
             None => {}
             Some(player) => {
                 game.print_board();
