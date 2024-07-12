@@ -1,9 +1,10 @@
+use std::{thread::sleep, time::Duration};
+
 use array2d::Array2D;
-use dialoguer::{theme::ColorfulTheme, Select};
 use inline_colorization::*;
 
 mod input_handlers;
-use input_handlers::{input, int_input};
+use input_handlers::int_input;
 
 // Connect 4 Rules - edited from https://rulesofplaying.com/connect-4-rules/
 //  - tic-tac-toe game played by two players.
@@ -18,57 +19,76 @@ use input_handlers::{input, int_input};
 
 #[derive(Debug, Clone)]
 struct Game {
-    name: String,
     board: Board,
     empty_character: String,
     player_turn: PlayerTurn,
 }
 impl Game {
     fn next_player(&mut self) {
+        // Simply switches the player turn
         match self.player_turn {
             PlayerTurn::Player1 => self.player_turn = PlayerTurn::Player2,
             PlayerTurn::Player2 => self.player_turn = PlayerTurn::Player1,
         }
     }
     fn print_board(&self) {
+        // Shortcut to ptint the board
         self.board.print(self.empty_character.clone());
+    }
+    fn check_wins(&self) -> Option<Player> {
+        match self.board.check_horizontal_wins() {
+            Some(player) => return Some(player),
+            None => {}
+        }
+        match self.board.check_vertical_wins() {
+            Some(player) => return Some(player),
+            None => {}
+        }
+        match self.board.check_diagonal_wins() {
+            Some(player) => return Some(player),
+            None => {}
+        }
+
+        None
+    }
+    fn check_tie(&self) -> bool {
+        self.board.is_full()
     }
 }
 #[derive(Debug, Clone)]
 struct Board(Array2D<BoardState>);
 impl Board {
     fn print(&self, empty_char: String) {
-        // Simply prints the board, with formatting, and colours.
+        // Prints the board, with formatting, and colours.
 
         // A reference to the 2d array
-        let board = &self.0;
+        let board_arr = &self.0;
 
         // Print the top table lablelling
         // ->      0  1  2  3  4  5  6 [x]
         print!("    ");
-        for col_index in 0..board.num_columns() {
+        for col_index in 0..board_arr.num_columns() {
             print!(" {col_index} ")
         }
         println!("[x] {style_reset}");
 
-        // Print the top table formattings (+ - - - +)
+        // Print the top table formattings
         // ->    +---------------------+
         print!("{color_green}   +");
-        for _ in 0..board.num_columns() {
+        for _ in 0..board_arr.num_columns() {
             print!("---")
         }
         println!("+{style_reset}");
 
         // Print each row, labelled
         // ->  5 | -  -  X  -  -  O  - |
-        for row_index in 0..board.num_rows() {
+        for row_index in 0..board_arr.num_rows() {
             // The row lablelling
             print!(" {row_index} {color_green}|{style_reset}");
 
-            for col_index in 0..board.num_columns() {
+            for col_index in 0..board_arr.num_columns() {
                 // Print each section of the board, with the users colour, or none if its empty
-                let state = board.get(row_index, col_index);
-                match state {
+                match board_arr.get(row_index, col_index) {
                     None => panic!("Tried to print a space that doesnt exist?!"),
                     Some(state) => match state {
                         BoardState::Empty => {
@@ -86,18 +106,12 @@ impl Board {
         // Print the bottom table formattings
         // -> [y]+---------------------+
         print!("{style_reset}[y]{color_green}+");
-        for _ in 0..board.num_columns() {
+        for _ in 0..board_arr.num_columns() {
             print!("---")
         }
         println!("+{style_reset}");
     }
-    fn is_full(&self) -> bool {
-        // The board is full when there are no more empty spaces
-        !self
-            .0
-            .elements_row_major_iter()
-            .any(|f| f == &BoardState::Empty)
-    }
+
     fn is_at_bottom(&self, row: usize, column: usize) -> bool {
         let board = &self.0;
         // Check if anything exists below, and if it does, make sure it is not empty
@@ -112,133 +126,126 @@ impl Board {
             None => true, // Nothing exists below it
         }
     }
-}
 
-fn check_horizontal_wins(board: Array2D<BoardState>) -> Option<Player> {
-    // Check for 4 in a row, on all rows
+    fn is_full(&self) -> bool {
+        // The board is full when there are no more empty spaces
+        !self
+            .0
+            .elements_row_major_iter()
+            .any(|f| f == &BoardState::Empty)
+    }
+    fn check_horizontal_wins(&self) -> Option<Player> {
+        // Check for 4 in a row, on all rows
 
-    // As close to the right as we can check for 4 in a row
-    let max_col_index = board.num_columns() - 3;
+        let board_arr = &self.0;
 
-    // For each row
-    for row_index in 0..board.num_rows() {
-        // For each column *we need to check*
-        // (impossible to win when there are only 3 or less existing spaces to the right)
-        for col_index in 0..max_col_index {
-            // Its fine to unwrap here, since if the item doesnt exist, something is wrong with max_col_index
-            let item1 = board.get(row_index, col_index).unwrap().clone();
-            let item2 = board.get(row_index, col_index + 1).unwrap().clone();
-            let item3 = board.get(row_index, col_index + 2).unwrap().clone();
-            let item4 = board.get(row_index, col_index + 3).unwrap().clone();
+        // As close to the right as we can check for 4 in a row
+        // (eg at col 4, there are only 2 to the right of it, so its impossible to get 4 in a row starting from col 4)
+        let max_col_index = board_arr.num_columns() - 3;
 
-            if let BoardState::Taken(player) = item1.clone() {
-                if item1 == item2 && item1 == item3 && item1 == item4 {
-                    // We found 4 in a row!
-                    return Some(player.clone());
+        for row_index in 0..board_arr.num_rows() {
+            for col_index in 0..max_col_index {
+                // Its fine to unwrap here, since if the item doesnt exist, something is wrong with max_col_index
+                // (We should never be trying to read a non existent item here)
+                let item1 = board_arr.get(row_index, col_index + 0).unwrap().clone();
+                let item2 = board_arr.get(row_index, col_index + 1).unwrap().clone();
+                let item3 = board_arr.get(row_index, col_index + 2).unwrap().clone();
+                let item4 = board_arr.get(row_index, col_index + 3).unwrap().clone();
+
+                if let BoardState::Taken(player) = item1.clone() {
+                    if item1 == item2 && item1 == item3 && item1 == item4 {
+                        // We found 4 in a row!
+                        return Some(player.clone());
+                    }
+                } else {
+                    // The board state is empty
+                    // Continue searching for a winner
+                    continue;
                 }
-            } else {
-                // Empty space, continue searching for a winner
-                continue;
             }
         }
+
+        // No wins were found
+        None
     }
+    fn check_vertical_wins(&self) -> Option<Player> {
+        // Check for 4 in a column, on all columns
 
-    None // No wins were found
-}
+        let board_arr = &self.0;
 
-fn check_vertical_wins(board: Array2D<BoardState>) -> Option<Player> {
-    // How low down we can go, where the is still 4 items to check
-    let max_row_index = board.num_columns() - 4;
+        // How low down we can go, where the is still 4 items to check
+        // (eg you cant get ma vertical win if you start from the bottom row)
+        let max_row_index = board_arr.num_columns() - 4;
 
-    // For each column
-    for col_index in 0..board.num_columns() {
+        for col_index in 0..board_arr.num_columns() {
+            for row_index in 0..max_row_index {
+                let item1 = board_arr.get(row_index + 0, col_index).unwrap().clone();
+                let item2 = board_arr.get(row_index + 1, col_index).unwrap().clone();
+                let item3 = board_arr.get(row_index + 2, col_index).unwrap().clone();
+                let item4 = board_arr.get(row_index + 3, col_index).unwrap().clone();
+
+                if let BoardState::Taken(player) = item1.clone() {
+                    if item1 == item2 && item1 == item3 && item1 == item4 {
+                        return Some(player.clone());
+                    }
+                } else {
+                    continue;
+                }
+            }
+        }
+
+        None
+    }
+    fn check_diagonal_wins(&self) -> Option<Player> {
+        // Check for 4 in a diagonal, in both direction
+        let board = &self.0;
+
+        // First focus on ones going from top left to bottom right
+        let max_row_index = board.num_columns() - 4;
+        let max_col_index = board.num_columns() - 3;
+
         for row_index in 0..max_row_index {
-            let item1 = board.get(row_index, col_index).unwrap().clone();
-            let item2 = board.get(row_index + 1, col_index).unwrap().clone();
-            let item3 = board.get(row_index + 2, col_index).unwrap().clone();
-            let item4 = board.get(row_index + 3, col_index).unwrap().clone();
+            for col_index in 0..max_col_index {
+                let item1 = board.get(row_index + 0, col_index + 0).unwrap().clone();
+                let item2 = board.get(row_index + 1, col_index + 1).unwrap().clone();
+                let item3 = board.get(row_index + 2, col_index + 2).unwrap().clone();
+                let item4 = board.get(row_index + 3, col_index + 3).unwrap().clone();
 
-            if let BoardState::Taken(player) = item1.clone() {
-                if item1 == item2 && item1 == item3 && item1 == item4 {
-                    return Some(player.clone());
+                if let BoardState::Taken(player) = item1.clone() {
+                    if item1 == item2 && item1 == item3 && item1 == item4 {
+                        return Some(player.clone());
+                    }
+                } else {
+                    // Empty space
+                    continue;
                 }
-            } else {
-                // Empty space
-                continue;
             }
         }
-    }
 
-    None
-}
+        // Now focus on ones going from top right to bottom left
 
-fn check_diagnal_wins(board: Array2D<BoardState>) -> Option<Player> {
-    // First focus on ones going from top left to bottom right
-    let max_row_index = board.num_columns() - 4;
-    let max_col_index = board.num_columns() - 3;
+        let min_col_index = board.num_columns() - max_col_index;
 
-    // For each row
-    for row_index in 0..max_row_index {
-        // For each column
-        for col_index in 0..max_col_index {
-            let item1 = board.get(row_index, col_index).unwrap().clone();
-            let item2 = board.get(row_index + 1, col_index + 1).unwrap().clone();
-            let item3 = board.get(row_index + 2, col_index + 2).unwrap().clone();
-            let item4 = board.get(row_index + 3, col_index + 3).unwrap().clone();
+        for row_index in 0..max_row_index {
+            for col_index in (min_col_index..board.num_columns()).rev() {
+                let item1 = board.get(row_index + 0, col_index - 0).unwrap().clone();
+                let item2 = board.get(row_index + 1, col_index - 1).unwrap().clone();
+                let item3 = board.get(row_index + 2, col_index - 2).unwrap().clone();
+                let item4 = board.get(row_index + 3, col_index - 3).unwrap().clone();
 
-            if let BoardState::Taken(player) = item1.clone() {
-                if item1 == item2 && item1 == item3 && item1 == item4 {
-                    return Some(player.clone());
+                if let BoardState::Taken(player) = item1.clone() {
+                    if item1 == item2 && item1 == item3 && item1 == item4 {
+                        return Some(player.clone());
+                    }
+                } else {
+                    // Empty space
+                    continue;
                 }
-            } else {
-                // Empty space
-                continue;
             }
         }
+
+        None
     }
-
-    let min_col_index = board.num_columns() - max_col_index;
-
-    for row_index in 0..max_row_index {
-        for col_index in (min_col_index..board.num_columns()).rev() {
-            let item1 = board.get(row_index, col_index).unwrap().clone();
-            let item2 = board.get(row_index + 1, col_index - 1).unwrap().clone();
-            let item3 = board.get(row_index + 2, col_index - 2).unwrap().clone();
-            let item4 = board.get(row_index + 3, col_index - 3).unwrap().clone();
-
-            if let BoardState::Taken(player) = item1.clone() {
-                if item1 == item2 && item1 == item3 && item1 == item4 {
-                    return Some(player.clone());
-                }
-            } else {
-                // Empty space
-                continue;
-            }
-        }
-    }
-
-    None
-}
-
-fn check_wins(board: Array2D<BoardState>) -> Option<Player> {
-    match check_horizontal_wins(board.clone()) {
-        Some(player) => return Some(player),
-        None => {}
-    }
-    match check_vertical_wins(board.clone()) {
-        Some(player) => return Some(player),
-        None => {}
-    }
-    match check_diagnal_wins(board.clone()) {
-        Some(player) => return Some(player),
-        None => {}
-    }
-
-    None
-}
-
-fn check_tie(board: Board) -> bool {
-    board.is_full()
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -308,7 +315,7 @@ impl Player {
 }
 
 fn new_game() {
-    let game_name = input("What would you like to call this game save?");
+    // Creates a new game, with 2 players, and lets them play
 
     let player1 = Player {
         name: "Player 1".into(),
@@ -323,23 +330,24 @@ fn new_game() {
     };
 
     let mut game = Game {
-        name: game_name,
         board: Board(Array2D::filled_with(BoardState::Empty, 6, 7)),
         empty_character: "-".into(),
         player_turn: PlayerTurn::Player1,
     };
 
     loop {
+        // Get the current player instance
         let player: Player;
         match game.player_turn {
             PlayerTurn::Player1 => player = player1.clone(),
             PlayerTurn::Player2 => player = player2.clone(),
         }
+
         game.print_board();
         player.clone().play_turn(&mut game);
         println!("");
 
-        match check_wins(game.board.0.clone()) {
+        match game.check_wins() {
             None => {}
             Some(player) => {
                 game.print_board();
@@ -350,32 +358,20 @@ fn new_game() {
             }
         }
 
-        match check_tie(game.board.clone()) {
-            false => {}
+        match game.check_tie() {
             true => {
                 println!("__________________________");
                 println!("The game is a tie!!!");
                 return;
             }
+            false => game.next_player(),
         }
-        game.next_player();
     }
 }
 
-fn load_game() {}
-
 fn main() {
-    let options = &["Start a new game", "Load a game save"];
-    let selection = Select::with_theme(&ColorfulTheme::default())
-        .with_prompt("What would you like to do?")
-        .default(0)
-        .items(&options[..])
-        .interact()
-        .unwrap();
-
-    match selection {
-        0 => new_game(),
-        1 => load_game(),
-        _ => panic!("What menu item did you click?"),
-    }
+    println!("{color_cyan}{style_bold}Welcome to Connect4!{style_reset}");
+    println!("          by {color_bright_cyan}@eshark22{style_reset}");
+    sleep(Duration::from_secs_f32(0.5));
+    new_game()
 }

@@ -1,0 +1,97 @@
+language: rust
+rust: nightly
+
+branches:
+  only:
+    - main
+
+jobs:
+  include:
+    - stage: "Setup Deploy - Github Releases"
+      os: linux
+      dist: jammy
+      language: bash
+      script: "echo Override the default script"
+
+      deploy: &github_deploy_base
+        provider: releases
+        name: $TRAVIS_TAG
+        api_key:
+          secure: XoTb9Eeeypu/qBeE5EdrSjUoZSFePxr5gbTH0M0q/Do0GmnJGDLp5Vj4bcrmBLBtePHouyNlmvmQnCRt4ljRvatbxSUOF81qOrE+4um47UvxNoytPmNdaBnk/+SBV8rXNcdftuDXNmEhGXKVOtRWZQ7SGGgexlFpDk1V5k4XjIBKbXJHDHA75N+UrXv5EL/ZRsXEb4QTsYgRm83rOMafwxYMX/8s5Z8A/z/wcfPqtePTNBC7dZj505wDP5PHkm7NEvv9GG4jvxmw50KG79a3jOjofTA7f/bNQnZL4rsyoKwtHkBqw+MWNpaZ+1875eD4SC9WR5yrfVQwmc5H1reMywRy846TrY4d45O32zsQ6aSClhoWiBwsR7vG2qe3HQnN1zK6Spcoa8x6RSHsBIj3glwIzTtV+yBFBnX2VBi1rPxOBBwlmfxOqQmSgZc35pmZvNGqg6vh8HHyfOiohXMjafYOOrKfwuBLCuc2hr96hJ55rhldFk2lZgJ+fsqHc8mBJGkckhV0vlRBPkAfqZ6aykuMH+f3FQMK+VASmRQwNRSnra3YatBrX/l2r2Ofrqg3geABPzxXAGR5EEXjU2HPSZaByCS9jRdyncSwqoF2e8oYXNBAHTZceJZe0e6/fvQ2cNDkvaK0iunlQq7weUBXrOxLeCYW6e5e0XkPYwTGdXM=
+        on:
+          all_branches: true
+        draft: true
+        overwrite: false
+        skip_cleanup: true
+        file:
+          - out/tmp.txt
+
+    - stage: "Compile for amd64 Windows"
+      arch: amd64
+      os: windows
+
+      after_success:
+        - cd target/release/; find * -maxdepth 0 -type f -executable -exec cp {} ../../out/AMD64_Windows_{} \;
+        - cd -
+
+      deploy:
+        <<: *github_deploy_base
+        file_glob: true
+        file: out/*
+
+    - stage: "Compile for arm64 Windows"
+      arch: arm64
+      os: windows
+
+      after_success:
+        - cd target/release/; find * -maxdepth 0 -type f -executable -exec cp {} ../../out/ARM64_Windows_{} \;
+        - cd -
+
+      deploy:
+        <<: *github_deploy_base
+        file_glob: true
+        file: out/*
+
+    - stage: "Compile for amd64 GNU/Linux"
+      arch: amd64
+      os: linux
+      dist: jammy
+
+      after_success:
+        - cd target/release/; find * -maxdepth 0 -type f -executable -exec cp {} ../../out/AMD64_Linux_{} \;
+        - cd -
+      deploy:
+        <<: *github_deploy_base
+        file_glob: true
+        file: out/*
+
+    - stage: "Deploy - GitHub Release"
+      language: bash
+      os: linux
+      dist: jammy
+
+      script: "echo Override the default script"
+
+      deploy:
+        <<: *github_deploy_base
+        draft: false
+        file_glob: true
+        file: out/*
+
+before_script:
+  - mkdir out
+  - echo "Temp file used in CI" > out/tmp.txt
+
+script:
+  - cargo build --verbose --release --bins
+
+before_deploy:
+  - git config --local user.name "Eshark"
+  - git config --local user.email "admin@eshark.tech"
+  - export TRAVIS_TAG="build-$TRAVIS_BUILD_NUMBER"
+  - echo "Tagging commit ${TRAVIS_COMMIT} with tag ${TRAVIS_TAG}"
+  - git tag "$TRAVIS_TAG" "$TRAVIS_COMMIT"
+  - ls out/
+
+cache:
+  - cargo
