@@ -90,14 +90,47 @@ fn is_at_bottom(board: Array2D<BoardState>, row: usize, col: usize) -> bool {
 
 fn check_horizontal_wins(board: Array2D<BoardState>) -> Option<Player> {
     // Check for 4 in a row, on all rows
-    for row_index in 0..board.column_len() {
-        // Check if x, x+1, x+2, and x+3 are all not empty
-        let max_col_index = board.row_len() - 3;
+
+    // As close to the right as we can check for 4 in a row
+    let max_col_index = board.num_columns() - 3;
+
+    // For each row
+    for row_index in 0..board.num_rows() {
+        // For each column *we need to check*
+        // (impossible to win when there are only 3 or less existing spaces to the right)
         for col_index in 0..max_col_index {
+            // Its fine to unwrap here, since if the item doesnt exist, something is wrong with max_col_index
             let item1 = board.get(row_index, col_index).unwrap().clone();
             let item2 = board.get(row_index, col_index + 1).unwrap().clone();
             let item3 = board.get(row_index, col_index + 2).unwrap().clone();
             let item4 = board.get(row_index, col_index + 3).unwrap().clone();
+
+            if let BoardState::Taken(player) = item1.clone() {
+                if item1 == item2 && item1 == item3 && item1 == item4 {
+                    // We found 4 in a row!
+                    return Some(player.clone());
+                }
+            } else {
+                // Empty space, continue searching for a winner
+                continue;
+            }
+        }
+    }
+
+    None // No wins were found
+}
+
+fn check_vertical_wins(board: Array2D<BoardState>) -> Option<Player> {
+    // How low down we can go, where the is still 4 items to check
+    let max_row_index = board.num_columns() - 4;
+
+    // For each column
+    for col_index in 0..board.num_columns() {
+        for row_index in 0..max_row_index {
+            let item1 = board.get(row_index, col_index).unwrap().clone();
+            let item2 = board.get(row_index + 1, col_index).unwrap().clone();
+            let item3 = board.get(row_index + 2, col_index).unwrap().clone();
+            let item4 = board.get(row_index + 3, col_index).unwrap().clone();
 
             if let BoardState::Taken(player) = item1.clone() {
                 if item1 == item2 && item1 == item3 && item1 == item4 {
@@ -113,16 +146,62 @@ fn check_horizontal_wins(board: Array2D<BoardState>) -> Option<Player> {
     None
 }
 
-fn check_vertical_wins(board: Array2D<BoardState>) -> Option<Player> {
-    None
-}
-
 fn check_diagnal_wins(board: Array2D<BoardState>) -> Option<Player> {
+    // First focus on ones going from top left to bottom right
+    let max_row_index = board.num_columns() - 4;
+    let max_col_index = board.num_columns() - 3;
+
+    // For each row
+    for row_index in 0..max_row_index {
+        // For each column
+        for col_index in 0..max_col_index {
+            println!("Checking row: {} col: {}", row_index, col_index);
+
+            let item1 = board.get(row_index, col_index).unwrap().clone();
+            let item2 = board.get(row_index + 1, col_index + 1).unwrap().clone();
+            let item3 = board.get(row_index + 2, col_index + 2).unwrap().clone();
+            let item4 = board.get(row_index + 3, col_index + 3).unwrap().clone();
+
+            if let BoardState::Taken(player) = item1.clone() {
+                if item1 == item2 && item1 == item3 && item1 == item4 {
+                    return Some(player.clone());
+                }
+            } else {
+                // Empty space
+                continue;
+            }
+        }
+    }
+
+    let min_row_index = board.num_rows() - max_row_index;
+    let min_col_index = board.num_columns() - max_col_index;
+
+    println!("{min_row_index}");
+
+    for row_index in (min_row_index..=board.num_rows()).rev() {
+        for col_index in (min_col_index..=board.num_columns()).rev() {
+            println!("Checking row: {} col: {}", row_index, col_index);
+        }
+    }
+
     None
 }
 
 fn check_wins(board: Array2D<BoardState>) -> Option<Player> {
-    check_horizontal_wins(board.clone())
+    match check_horizontal_wins(board.clone()) {
+        Some(player) => return Some(player),
+        None => {}
+    }
+    match check_vertical_wins(board.clone()) {
+        Some(player) => return Some(player),
+        None => {}
+    }
+    match check_diagnal_wins(board.clone()) {
+        Some(player) => return Some(player),
+        None => {}
+    }
+
+    None
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 enum BoardState {
