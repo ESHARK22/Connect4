@@ -23,6 +23,7 @@ jobs:
         draft: true
         overwrite: false
         skip_cleanup: true
+        edge: true
         file:
           - out/tmp.txt
 
