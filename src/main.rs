@@ -30,14 +30,19 @@ enum BoardState {
     Taken(Player),
 }
 
-#[derive(Clone, Resource)]
+#[derive(Component)]
+struct Chip {
+    row: f32,
+    col: f32,
+}
+
+#[derive(Clone, Component)]
 struct Player {
     name: String,
     num: PlayerNum,
-    colour: Color,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Component)]
 enum PlayerNum {
     Player1,
     Player2,
@@ -52,10 +57,13 @@ fn main() {
 
     // On startup
     app.add_systems(Startup, setup_camera);
-    app.add_systems(Startup, setup);
+    app.add_systems(Startup, create_board_resource);
+    app.add_systems(Startup, create_board_background);
+    app.add_systems(Startup, draw_initial_chips);
+    app.add_systems(PostStartup, test_update_board_state);
 
     // Normal updates
-    app.add_systems(Update, keyboard_system);
+    app.add_systems(Update, update_chip_colour);
 
     app.run();
 }
@@ -64,26 +72,42 @@ fn setup_camera(mut command: Commands) {
     command.spawn(Camera2dBundle::default());
 }
 
-fn setup_game_resources(mut command: Commands) {
-    // Spawn a player
-    command.insert_resource(Player {
-        name: "Player 1".into(),
-        num: PlayerNum::Player1,
-        colour: RED,
-    });
+fn create_board_background(
+    mut command: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
+) {
+    // A Blue backgorund for the board
+    let bg_width = GAP + (COL_COUNT * CIRCLE_DIAMETER) + (COL_COUNT * GAP);
+    let bg_height = GAP + (ROW_COUNT * CIRCLE_DIAMETER) + (ROW_COUNT * GAP);
 
-    // Spawn another player
-    command.insert_resource(Player {
-        name: "Player 2".into(),
-        num: PlayerNum::Player2,
-        colour: YELLOW,
-    });
+    // Th bg shape
+    let bg_rectangle = Mesh2dHandle(meshes.add(Rectangle::new(bg_width, bg_height)));
 
-    // Spawn a board
+    command.spawn(MaterialMesh2dBundle {
+        mesh: bg_rectangle.clone(),
+        material: materials.add(BLUE),
+        transform: Transform::from_xyz(bg_width / 2.0, bg_height / 2.0, -1.0), // Half to center it, -1 to make it behind other stuff
+        ..default()
+    });
+}
+
+fn create_board_resource(mut command: Commands) {
     command.insert_resource(Board(Array2D::filled_with(BoardState::Empty, 6, 7)));
 }
 
-fn setup(
+fn create_players(mut command: Commands) {
+    command.spawn(Player {
+        name: "Player 1".into(),
+        num: PlayerNum::Player1,
+    });
+    command.spawn(Player {
+        name: "Player 2".into(),
+        num: PlayerNum::Player2,
+    });
+}
+
+fn draw_initial_chips(
     mut command: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
@@ -91,34 +115,7 @@ fn setup(
     // Circle test
     let circle = Mesh2dHandle(meshes.add(Circle::new(CIRCLE_RADIUS)));
 
-    // Red circle
-    command.spawn(MaterialMesh2dBundle {
-        mesh: circle.clone(),
-        material: materials.add(RED),
-        transform: Transform::from_xyz(0.0, 0.0, 1.0),
-        ..default()
-    });
-
-    // Yellow circle
-    command.spawn(MaterialMesh2dBundle {
-        mesh: circle.clone(),
-        material: materials.add(YELLOW),
-        transform: Transform::from_xyz(60.0, 0.0, 1.0),
-        ..default()
-    });
-
-    // A Blue backgorund for the board
-    let bg_width = GAP + (COL_COUNT * CIRCLE_DIAMETER) + (COL_COUNT * GAP);
-    let bg_height = GAP + (ROW_COUNT * CIRCLE_DIAMETER) + (ROW_COUNT * GAP);
-
-    let bg_rectangle = Mesh2dHandle(meshes.add(Rectangle::new(bg_width, bg_height)));
-    command.spawn(MaterialMesh2dBundle {
-        mesh: bg_rectangle.clone(),
-        material: materials.add(BLUE),
-        transform: Transform::from_xyz(bg_width / 2.0, bg_height / 2.0, -1.0), // Half to center it
-        ..default()
-    });
-
+    // Draw the holes
     for row in 0..ROW_COUNT as u8 {
         for col in 0..COL_COUNT as u8 {
             let row = row as f32;
@@ -127,18 +124,45 @@ fn setup(
             let x = GAP + CIRCLE_RADIUS + (col * CIRCLE_DIAMETER) + (col * GAP);
             let y = GAP + CIRCLE_RADIUS + (row * CIRCLE_DIAMETER) + (row * GAP);
 
-            command.spawn(MaterialMesh2dBundle {
-                mesh: circle.clone(),
-                material: materials.add(BLACK),
-                transform: Transform::from_xyz(x, y, 0.0),
-                ..default()
-            });
+            command.spawn((
+                MaterialMesh2dBundle {
+                    mesh: circle.clone(),
+                    material: materials.add(BLACK),
+                    transform: Transform::from_xyz(x, y, 0.0),
+                    ..default()
+                },
+                Chip { row, col },
+            ));
         }
     }
 }
 
-fn keyboard_system(keyboard: Res<ButtonInput<KeyCode>>) {
-    if keyboard.just_pressed(KeyCode::Space) {
-        info!("Space Pressed!")
+fn update_chip_colour(
+    board: Res<Board>,
+    mut chip_query: Query<(&Chip, &Handle<ColorMaterial>)>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
+) {
+    for (chip, colour_handle) in &mut chip_query.iter_mut() {
+        match board.get(chip.row as usize, chip.col as usize) {
+            None => panic!("Tried to check a space that doesnt exist?!"),
+            Some(state) => {
+                let colour = match state {
+                    BoardState::Empty => BLACK,
+                    BoardState::Taken(player) => match player.num {
+                        PlayerNum::Player1 => RED,
+                        PlayerNum::Player2 => YELLOW,
+                    },
+                };
+
+                let chip_material = materials.get_mut(colour_handle).unwrap();
+                if chip_material.color != colour {
+                    chip_material.color = colour
+                }
+            }
+        }
     }
+}
+
+fn test_update_board_state(mut board: ResMut<Board>) {
+    board[(2, 3)] = BoardState::Taken(player.as_ref().clone());
 }
