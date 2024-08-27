@@ -1,377 +1,144 @@
-use std::{thread::sleep, time::Duration};
+#![allow(unused)]
 
 use array2d::Array2D;
-use inline_colorization::*;
+use bevy::{
+    prelude::*,
+    sprite::{MaterialMesh2dBundle, Mesh2dHandle},
+};
+use bevy_inspector_egui::quick::WorldInspectorPlugin;
+use Annulus as Ring;
 
-mod input_handlers;
-use input_handlers::int_input;
+const ROW_COUNT: f32 = 6.0;
+const COL_COUNT: f32 = 7.0;
 
-// Connect 4 Rules - edited from https://rulesofplaying.com/connect-4-rules/
-//  - tic-tac-toe game played by two players.
-//  - Players take turns placing pieces on a vertical board.
-//  - The board is 7 columns long and 6 rows high.
-//  - Each player uses pieces of a specific color, usually black and red or sometimes yellow and red.
-// The goal is to be the first to get four pieces in a horizontal, vertical, or diagonal line.
-// Since the board is vertical, parts inserted in a certain column always fall in the lowest unoccupied row in that column.
-// As soon as a column contains six parts, it is full, and no further parts can be placed on the column.
-// Both the players begin with 21 similar pieces, and the first player to reach a series of four connected pieces wins the game.
-// If all the men have played and neither player has four parts in a row, the game is a tie.
+const CIRCLE_RADIUS: f32 = 24.0;
+const CIRCLE_DIAMETER: f32 = CIRCLE_RADIUS * 2.0;
 
-#[derive(Debug, Clone)]
-struct Game {
-    board: Board,
-    empty_character: String,
-    player_turn: PlayerTurn,
-}
-impl Game {
-    fn next_player(&mut self) {
-        // Simply switches the player turn
-        match self.player_turn {
-            PlayerTurn::Player1 => self.player_turn = PlayerTurn::Player2,
-            PlayerTurn::Player2 => self.player_turn = PlayerTurn::Player1,
-        }
-    }
-    fn print_board(&self) {
-        // Shortcut to ptint the board
-        self.board.print(self.empty_character.clone());
-    }
-    fn check_wins(&self) -> Option<Player> {
-        match self.board.check_horizontal_wins() {
-            Some(player) => return Some(player),
-            None => {}
-        }
-        match self.board.check_vertical_wins() {
-            Some(player) => return Some(player),
-            None => {}
-        }
-        match self.board.check_diagonal_wins() {
-            Some(player) => return Some(player),
-            None => {}
-        }
+const GAP: f32 = 5.0;
 
-        None
-    }
-    fn check_tie(&self) -> bool {
-        self.board.is_full()
-    }
-}
-#[derive(Debug, Clone)]
+const RED: Color = Color::srgb(1.0, 0.0, 0.0);
+const BLUE: Color = Color::srgb(0.0, 0.0, 1.0);
+const YELLOW: Color = Color::srgb(1.5, 1.5, 0.0);
+const BLACK: Color = Color::srgb(0.0, 0.0, 0.0);
+
+#[derive(Deref, DerefMut, Resource)]
 struct Board(Array2D<BoardState>);
-impl Board {
-    fn print(&self, empty_char: String) {
-        // Prints the board, with formatting, and colours.
 
-        // A reference to the 2d array
-        let board_arr = &self.0;
-
-        // Print the top table lablelling
-        // ->      0  1  2  3  4  5  6 [x]
-        print!("    ");
-        for col_index in 0..board_arr.num_columns() {
-            print!(" {col_index} ")
-        }
-        println!("[x] {style_reset}");
-
-        // Print the top table formattings
-        // ->    +---------------------+
-        print!("{color_green}   +");
-        for _ in 0..board_arr.num_columns() {
-            print!("---")
-        }
-        println!("+{style_reset}");
-
-        // Print each row, labelled
-        // ->  5 | -  -  X  -  -  O  - |
-        for row_index in 0..board_arr.num_rows() {
-            // The row lablelling
-            print!(" {row_index} {color_green}|{style_reset}");
-
-            for col_index in 0..board_arr.num_columns() {
-                // Print each section of the board, with the users colour, or none if its empty
-                match board_arr.get(row_index, col_index) {
-                    None => panic!("Tried to print a space that doesnt exist?!"),
-                    Some(state) => match state {
-                        BoardState::Empty => {
-                            print!("{} {} {}", color_white, empty_char, style_reset)
-                        }
-                        BoardState::Taken(player) => {
-                            print!("{} {} {}", player.colour, player.character, style_reset)
-                        }
-                    },
-                }
-            }
-            println!("{color_green}|{style_reset}")
-        }
-
-        // Print the bottom table formattings
-        // -> [y]+---------------------+
-        print!("{style_reset}[y]{color_green}+");
-        for _ in 0..board_arr.num_columns() {
-            print!("---")
-        }
-        println!("+{style_reset}");
-    }
-
-    fn is_at_bottom(&self, row: usize, column: usize) -> bool {
-        let board = &self.0;
-        // Check if anything exists below, and if it does, make sure it is not empty
-        // If it is empty, then we are not at the bottom
-        match board.get(row + 1, column) {
-            Some(&ref state) => {
-                match state {
-                    BoardState::Taken(_) => true, // Cant go any lower
-                    BoardState::Empty => false,   // Could have gone lower
-                }
-            }
-            None => true, // Nothing exists below it
-        }
-    }
-
-    fn is_full(&self) -> bool {
-        // The board is full when there are no more empty spaces
-        !self
-            .0
-            .elements_row_major_iter()
-            .any(|f| f == &BoardState::Empty)
-    }
-    fn check_horizontal_wins(&self) -> Option<Player> {
-        // Check for 4 in a row, on all rows
-
-        let board_arr = &self.0;
-
-        // As close to the right as we can check for 4 in a row
-        // (eg at col 4, there are only 2 to the right of it, so its impossible to get 4 in a row starting from col 4)
-        let max_col_index = board_arr.num_columns() - 3;
-
-        for row_index in 0..board_arr.num_rows() {
-            for col_index in 0..max_col_index {
-                // Its fine to unwrap here, since if the item doesnt exist, something is wrong with max_col_index
-                // (We should never be trying to read a non existent item here)
-                let item1 = board_arr.get(row_index, col_index + 0).unwrap().clone();
-                let item2 = board_arr.get(row_index, col_index + 1).unwrap().clone();
-                let item3 = board_arr.get(row_index, col_index + 2).unwrap().clone();
-                let item4 = board_arr.get(row_index, col_index + 3).unwrap().clone();
-
-                if let BoardState::Taken(player) = item1.clone() {
-                    if item1 == item2 && item1 == item3 && item1 == item4 {
-                        // We found 4 in a row!
-                        return Some(player.clone());
-                    }
-                } else {
-                    // The board state is empty
-                    // Continue searching for a winner
-                    continue;
-                }
-            }
-        }
-
-        // No wins were found
-        None
-    }
-    fn check_vertical_wins(&self) -> Option<Player> {
-        // Check for 4 in a column, on all columns
-
-        let board_arr = &self.0;
-
-        // How low down we can go, where the is still 4 items to check
-        // (eg you cant get ma vertical win if you start from the bottom row)
-        let max_row_index = board_arr.num_columns() - 4;
-
-        for col_index in 0..board_arr.num_columns() {
-            for row_index in 0..max_row_index {
-                let item1 = board_arr.get(row_index + 0, col_index).unwrap().clone();
-                let item2 = board_arr.get(row_index + 1, col_index).unwrap().clone();
-                let item3 = board_arr.get(row_index + 2, col_index).unwrap().clone();
-                let item4 = board_arr.get(row_index + 3, col_index).unwrap().clone();
-
-                if let BoardState::Taken(player) = item1.clone() {
-                    if item1 == item2 && item1 == item3 && item1 == item4 {
-                        return Some(player.clone());
-                    }
-                } else {
-                    continue;
-                }
-            }
-        }
-
-        None
-    }
-    fn check_diagonal_wins(&self) -> Option<Player> {
-        // Check for 4 in a diagonal, in both direction
-        let board = &self.0;
-
-        // First focus on ones going from top left to bottom right
-        let max_row_index = board.num_columns() - 4;
-        let max_col_index = board.num_columns() - 3;
-
-        for row_index in 0..max_row_index {
-            for col_index in 0..max_col_index {
-                let item1 = board.get(row_index + 0, col_index + 0).unwrap().clone();
-                let item2 = board.get(row_index + 1, col_index + 1).unwrap().clone();
-                let item3 = board.get(row_index + 2, col_index + 2).unwrap().clone();
-                let item4 = board.get(row_index + 3, col_index + 3).unwrap().clone();
-
-                if let BoardState::Taken(player) = item1.clone() {
-                    if item1 == item2 && item1 == item3 && item1 == item4 {
-                        return Some(player.clone());
-                    }
-                } else {
-                    // Empty space
-                    continue;
-                }
-            }
-        }
-
-        // Now focus on ones going from top right to bottom left
-
-        let min_col_index = board.num_columns() - max_col_index;
-
-        for row_index in 0..max_row_index {
-            for col_index in (min_col_index..board.num_columns()).rev() {
-                let item1 = board.get(row_index + 0, col_index - 0).unwrap().clone();
-                let item2 = board.get(row_index + 1, col_index - 1).unwrap().clone();
-                let item3 = board.get(row_index + 2, col_index - 2).unwrap().clone();
-                let item4 = board.get(row_index + 3, col_index - 3).unwrap().clone();
-
-                if let BoardState::Taken(player) = item1.clone() {
-                    if item1 == item2 && item1 == item3 && item1 == item4 {
-                        return Some(player.clone());
-                    }
-                } else {
-                    // Empty space
-                    continue;
-                }
-            }
-        }
-
-        None
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Clone)]
 enum BoardState {
-    Taken(Player),
     Empty,
+    Taken(Player),
 }
 
-#[derive(Debug, Clone)]
-enum PlayerTurn {
+#[derive(Clone, Resource)]
+struct Player {
+    name: String,
+    num: PlayerNum,
+    colour: Color,
+}
+
+#[derive(Clone)]
+enum PlayerNum {
     Player1,
     Player2,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-struct Player {
-    name: String,
-    character: String,
-    colour: String,
-}
-impl Player {
-    fn play_turn(self, game: &mut Game) {
-        let board = game.board.clone();
-        let board_arr = &mut game.board.0;
-        let name = self.name.clone();
-
-        loop {
-            let mut col_index: usize;
-            loop {
-                println!("It is {}'s turn!", name);
-                col_index = int_input("Enter the column you would like to go in: ");
-                let current_state = board_arr.get_mut(0, col_index); // Start at the top
-                match current_state {
-                    Some(_) => break, // It exists
-                    None => {
-                        println!("Stop trying to play outside the board -_-");
-                        println!("Try again...");
-                    }
-                }
-            }
-            // Find the lowest cords you can go to
-            let mut row_index = 0;
-            while !board.is_at_bottom(row_index, col_index) {
-                row_index += 1
-            }
-
-            let current_state = board_arr.get_mut(row_index, col_index);
-            match current_state {
-                Some(current_state) => match current_state {
-                    BoardState::Empty => {
-                        board_arr[(row_index, col_index)] = BoardState::Taken(self.clone());
-                        return;
-                    }
-                    BoardState::Taken(_) => {
-                        println!("That column is already full!");
-                        println!("Try a different one...");
-                    }
-                },
-                None => {
-                    // Does not exist on the board
-                    println!("Oi, stop trying to play outside the box!");
-                    println!("Try again...");
-                }
-            }
-        }
-    }
-}
-
-fn new_game() {
-    // Creates a new game, with 2 players, and lets them play
-
-    let player1 = Player {
-        name: "Player 1".into(),
-        character: "O".into(),
-        colour: format!("{color_bright_yellow}").into(),
-    };
-
-    let player2 = Player {
-        name: "Player 2".into(),
-        character: "X".into(),
-        colour: format!("{color_bright_red}").into(),
-    };
-
-    let mut game = Game {
-        board: Board(Array2D::filled_with(BoardState::Empty, 6, 7)),
-        empty_character: "-".into(),
-        player_turn: PlayerTurn::Player1,
-    };
-
-    loop {
-        // Get the current player instance
-        let player: Player;
-        match game.player_turn {
-            PlayerTurn::Player1 => player = player1.clone(),
-            PlayerTurn::Player2 => player = player2.clone(),
-        }
-
-        game.print_board();
-        player.clone().play_turn(&mut game);
-        println!("");
-
-        match game.check_wins() {
-            None => {}
-            Some(player) => {
-                game.print_board();
-                let player_name = player.name;
-                println!("__________________________");
-                println!("{player_name} won the game!!!");
-                return;
-            }
-        }
-
-        match game.check_tie() {
-            true => {
-                println!("__________________________");
-                println!("The game is a tie!!!");
-                return;
-            }
-            false => game.next_player(),
-        }
-    }
-}
-
 fn main() {
-    println!("{color_cyan}{style_bold}Welcome to Connect4!{style_reset}");
-    println!("          by {color_bright_cyan}@eshark22{style_reset}");
-    sleep(Duration::from_secs_f32(0.5));
-    new_game()
+    let mut app = App::new();
+
+    // Plugins
+    app.add_plugins((DefaultPlugins));
+    app.add_plugins(WorldInspectorPlugin::new());
+
+    // On startup
+    app.add_systems(Startup, setup_camera);
+    app.add_systems(Startup, setup);
+
+    // Normal updates
+    app.add_systems(Update, keyboard_system);
+
+    app.run();
+}
+
+fn setup_camera(mut command: Commands) {
+    command.spawn(Camera2dBundle::default());
+}
+
+fn setup_game_resources(mut command: Commands) {
+    // Spawn a player
+    command.insert_resource(Player {
+        name: "Player 1".into(),
+        num: PlayerNum::Player1,
+        colour: RED,
+    });
+
+    // Spawn another player
+    command.insert_resource(Player {
+        name: "Player 2".into(),
+        num: PlayerNum::Player2,
+        colour: YELLOW,
+    });
+
+    // Spawn a board
+    command.insert_resource(Board(Array2D::filled_with(BoardState::Empty, 6, 7)));
+}
+
+fn setup(
+    mut command: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
+) {
+    // Circle test
+    let circle = Mesh2dHandle(meshes.add(Circle::new(CIRCLE_RADIUS)));
+
+    // Red circle
+    command.spawn(MaterialMesh2dBundle {
+        mesh: circle.clone(),
+        material: materials.add(RED),
+        transform: Transform::from_xyz(0.0, 0.0, 1.0),
+        ..default()
+    });
+
+    // Yellow circle
+    command.spawn(MaterialMesh2dBundle {
+        mesh: circle.clone(),
+        material: materials.add(YELLOW),
+        transform: Transform::from_xyz(60.0, 0.0, 1.0),
+        ..default()
+    });
+
+    // A Blue backgorund for the board
+    let bg_width = GAP + (COL_COUNT * CIRCLE_DIAMETER) + (COL_COUNT * GAP);
+    let bg_height = GAP + (ROW_COUNT * CIRCLE_DIAMETER) + (ROW_COUNT * GAP);
+
+    let bg_rectangle = Mesh2dHandle(meshes.add(Rectangle::new(bg_width, bg_height)));
+    command.spawn(MaterialMesh2dBundle {
+        mesh: bg_rectangle.clone(),
+        material: materials.add(BLUE),
+        transform: Transform::from_xyz(bg_width / 2.0, bg_height / 2.0, -1.0), // Half to center it
+        ..default()
+    });
+
+    for row in 0..ROW_COUNT as u8 {
+        for col in 0..COL_COUNT as u8 {
+            let row = row as f32;
+            let col = col as f32;
+
+            let x = GAP + CIRCLE_RADIUS + (col * CIRCLE_DIAMETER) + (col * GAP);
+            let y = GAP + CIRCLE_RADIUS + (row * CIRCLE_DIAMETER) + (row * GAP);
+
+            command.spawn(MaterialMesh2dBundle {
+                mesh: circle.clone(),
+                material: materials.add(BLACK),
+                transform: Transform::from_xyz(x, y, 0.0),
+                ..default()
+            });
+        }
+    }
+}
+
+fn keyboard_system(keyboard: Res<ButtonInput<KeyCode>>) {
+    if keyboard.just_pressed(KeyCode::Space) {
+        info!("Space Pressed!")
+    }
 }
