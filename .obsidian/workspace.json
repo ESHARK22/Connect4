@@ -1,0 +1,165 @@
+{
+  "main": {
+    "id": "cb715a30c1a8a7e0",
+    "type": "split",
+    "children": [
+      {
+        "id": "befc0c8903f9f7be",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "4015a910c072da22",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Design.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "755d80c2e684dc29",
+    "type": "split",
+    "children": [
+      {
+        "id": "9950c5bed92fcaae",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "7f8880bc11594934",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "00107ed31174b0a5",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "c18ee9db1f39026d",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {}
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "e6f226bcad4abdfd",
+    "type": "split",
+    "children": [
+      {
+        "id": "48eb7353d7fa2fa0",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "3b60ec8638d2f18b",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "Design.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "4be3f7ea335593c4",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "Design.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "3381fc0fe78898f6",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true
+              }
+            }
+          },
+          {
+            "id": "a925d50842997fa3",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "Design.md"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false
+    }
+  },
+  "active": "4015a910c072da22",
+  "lastOpenFiles": [
+    "target/release/connect4.d",
+    "target/release/connect4",
+    "target/release/deps/connect4-770dc8634f2fcb60",
+    "target/release/deps/connect4-770dc8634f2fcb60.bxubsrd48fcbbjlnor6carq8e.rcgu.o",
+    "target/release/deps/connect4-770dc8634f2fcb60.approx-1594cece8911c2ab.approx.5fa2c1dba32bae74-cgu.0.rcgu.o.rcgu.o",
+    "target/release/deps/connect4-770dc8634f2fcb60.fnv-99c29fc9b4ca6d9a.fnv.9d6d835194bc7be2-cgu.0.rcgu.o.rcgu.o",
+    "target/release/deps/connect4-770dc8634f2fcb60.euclid-d72174c20aebfb0b.euclid.ad08ddd9b0f704bb-cgu.0.rcgu.o.rcgu.o",
+    "target/release/deps/connect4-770dc8634f2fcb60.grid-f42bc4a2ff09f16b.grid.bad944e943f189a2-cgu.0.rcgu.o.rcgu.o",
+    "target/release/deps/connect4-770dc8634f2fcb60.bevy-7d9e4395525b76d5.bevy.872a120c5f1acb66-cgu.0.rcgu.o.rcgu.o",
+    "target/release/deps/connect4-770dc8634f2fcb60.cfg_if-6639072b574fa51a.cfg_if.a42ffd9901ada0bc-cgu.0.rcgu.o.rcgu.o",
+    "target/release/deps/connect4-770dc8634f2fcb60.radsort-651c9a0498aa368f.radsort.df0104e2ebfee58f-cgu.0.rcgu.o.rcgu.o",
+    "Design.md",
+    "README.md"
+  ]
+}
