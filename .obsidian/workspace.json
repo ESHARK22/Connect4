@@ -4,19 +4,15 @@
     "type": "split",
     "children": [
       {
-        "id": "befc0c8903f9f7be",
+        "id": "787d5d700f066797",
         "type": "tabs",
         "children": [
           {
-            "id": "4015a910c072da22",
+            "id": "84872ce793548fed",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "README.md",
-                "mode": "source",
-                "source": false
-              }
+              "type": "empty",
+              "state": {}
             }
           }
         ]
@@ -85,7 +81,6 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "README.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +97,6 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "README.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -124,9 +118,7 @@
             "type": "leaf",
             "state": {
               "type": "outline",
-              "state": {
-                "file": "README.md"
-              }
+              "state": {}
             }
           }
         ]
@@ -146,8 +138,11 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "4015a910c072da22",
+  "active": "84872ce793548fed",
   "lastOpenFiles": [
+    "README.md",
+    "screenshot-2024-08-28-10-43-28 1.png",
+    "screenshot-2024-08-28-10-43-28.png",
     "target/debug/deps/libconnect4-8f2c3938ee4e9d2d.rmeta",
     "target/debug/deps/libconnect4-3615228190bed44c.rmeta",
     "target/debug/deps/connect4-8f2c3938ee4e9d2d.d",
@@ -158,8 +153,6 @@
     "target/debug/incremental/connect4-0k9dc5mae03pq/s-gzemnml6ki-0k27tr9.lock",
     "target/debug/incremental/connect4-0k9dc5mae03pq/s-gzemnml6ki-0k27tr9-76a7gjk10jzmdkhfx1o19hm7g",
     "target/debug/incremental/connect4-0k9dc5mae03pq",
-    "target/debug/incremental/connect4-2zk6ob2tdy4si/s-gzemnml4ke-17uzbk8-4wp7y5uebkics174gulec3vgd/work-products.bin",
-    "Design.md",
-    "README.md"
+    "Design.md"
   ]
 }
