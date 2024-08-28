@@ -59,7 +59,7 @@ jobs:
 
       - name: Symlink clang binaries (Linux)
         if: ${{ startsWith(matrix.platform.os_name, 'Linux') }}
-        run: for file in /bin/*-18; do ln -s "$file" "${file%-18}"; done
+        run: for file in /bin/*-18; do sudo ln -s "$file" "${file%-18}"; done
 
       - name: Install mold linker (Linux)
         uses: rui314/setup-mold@v1
