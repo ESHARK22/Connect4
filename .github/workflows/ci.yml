@@ -57,14 +57,18 @@ jobs:
         if: ${{ startsWith(matrix.platform.os_name, 'Linux') }}
         run: sudo bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
 
+      - name: Symlink clang binaries (Linux)
+        if: ${{ startsWith(matrix.platform.os_name, 'Linux') }}
+        run: for file in /bin/*-18; do ln -s "$file" "${file%-18}"; done
+
       - name: Install mold linker (Linux)
         uses: rui314/setup-mold@v1
         with:
           make-default: true
 
-      - name: Install libwayland (Linux)
+      - name: Install build dependencies
         if: ${{ startsWith(matrix.platform.os_name, 'Linux') }}
-        run: sudo apt install libwayland-dev
+        run: sudo apt install libwayland-dev libasound2-dev
 
       - name: Checkout the connect 4 game
         uses: actions/checkout@v4
