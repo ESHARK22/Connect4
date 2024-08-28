@@ -58,7 +58,7 @@ jobs:
 
       - name: Install wayland-dev
         if: ${{ startsWith(matrix.platform.os_name, 'Linux') }}
-        run: apt update && apt install wayland-dev
+        run: sudo apt update && sudo apt install wayland-dev
 
       - name: Build binary
         uses: houseabsolute/actions-rust-cross@v0
