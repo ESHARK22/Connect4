@@ -57,6 +57,9 @@ jobs:
       - name: Checkout the connect 4 game
         uses: actions/checkout@v4
 
+      - name: Install rustup target
+        run: rustup target add ${{ matrix.platform.target }}
+
       - name: Setup rust cache
         uses: Swatinem/rust-cache@v2
 
