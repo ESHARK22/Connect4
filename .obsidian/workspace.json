@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Design.md",
+                "file": "README.md",
                 "mode": "source",
                 "source": false
               }
@@ -85,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Design.md",
+                "file": "README.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Design.md",
+                "file": "README.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Design.md"
+                "file": "README.md"
               }
             }
           }
@@ -148,17 +148,17 @@
   },
   "active": "4015a910c072da22",
   "lastOpenFiles": [
-    "target/release/connect4.d",
-    "target/release/connect4",
-    "target/release/deps/connect4-770dc8634f2fcb60",
-    "target/release/deps/connect4-770dc8634f2fcb60.bxubsrd48fcbbjlnor6carq8e.rcgu.o",
-    "target/release/deps/connect4-770dc8634f2fcb60.approx-1594cece8911c2ab.approx.5fa2c1dba32bae74-cgu.0.rcgu.o.rcgu.o",
-    "target/release/deps/connect4-770dc8634f2fcb60.fnv-99c29fc9b4ca6d9a.fnv.9d6d835194bc7be2-cgu.0.rcgu.o.rcgu.o",
-    "target/release/deps/connect4-770dc8634f2fcb60.euclid-d72174c20aebfb0b.euclid.ad08ddd9b0f704bb-cgu.0.rcgu.o.rcgu.o",
-    "target/release/deps/connect4-770dc8634f2fcb60.grid-f42bc4a2ff09f16b.grid.bad944e943f189a2-cgu.0.rcgu.o.rcgu.o",
-    "target/release/deps/connect4-770dc8634f2fcb60.bevy-7d9e4395525b76d5.bevy.872a120c5f1acb66-cgu.0.rcgu.o.rcgu.o",
-    "target/release/deps/connect4-770dc8634f2fcb60.cfg_if-6639072b574fa51a.cfg_if.a42ffd9901ada0bc-cgu.0.rcgu.o.rcgu.o",
-    "target/release/deps/connect4-770dc8634f2fcb60.radsort-651c9a0498aa368f.radsort.df0104e2ebfee58f-cgu.0.rcgu.o.rcgu.o",
+    "target/debug/deps/egui-29667f38192b9495.d",
+    "target/debug/deps/libepaint-526fbbdb85a1426a.rmeta",
+    "target/debug/deps/bevy_reflect-416a6c1f4b9eccb4.d",
+    "target/debug/deps/libarboard-46fa754e59ce366e.rmeta",
+    "target/debug/deps/epaint-526fbbdb85a1426a.d",
+    "target/debug/deps/arboard-46fa754e59ce366e.d",
+    "target/debug/deps/libahash-6481413590ceb307.rmeta",
+    "target/debug/deps/libparking_lot-cd8e5c768243a459.rmeta",
+    "target/debug/deps/libkhronos_egl-4d8b927a6f0358ff.rmeta",
+    "target/debug/deps/uuid-dbc49dc0e7b8f37d.d",
+    "target/debug/deps/rustix-eabee0a74c8eeced.d",
     "Design.md",
     "README.md"
   ]
