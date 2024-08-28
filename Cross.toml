@@ -2,7 +2,7 @@
 pre-build = [
     "dpkg --add-architecture $CROSS_DEB_ARCH",
     "apt update",
-    "apt install -y wget mold lsb-release wget software-properties-common gnupg build-essential pkg-config libwayland-dev librust-alsa-sys-dev",
+    "apt install -y wget mold lsb-release wget software-properties-common gnupg build-essential pkg-config g++ pkg-config libx11-dev libasound2-dev libudev-dev libxkbcommon-x11-0 libxkbcommon-dev libwayland-dev librust-alsa-sys-dev",
     "wget https://apt.llvm.org/llvm.sh",
     "chmod +x llvm.sh",
     "./llvm.sh 18",
