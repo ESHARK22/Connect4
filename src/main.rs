@@ -6,6 +6,7 @@ use bevy::{
     sprite::{MaterialMesh2dBundle, Mesh2dHandle},
 };
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
+
 use Annulus as Ring;
 
 const ROW_COUNT: f32 = 6.0;
@@ -42,11 +43,13 @@ struct Player {
     num: PlayerNum,
 }
 
-#[derive(Clone, Component)]
+#[derive(Clone, PartialEq, Component)]
 enum PlayerNum {
     Player1,
     Player2,
 }
+use PlayerNum::Player1;
+use PlayerNum::Player2;
 
 fn main() {
     let mut app = App::new();
@@ -59,8 +62,9 @@ fn main() {
     app.add_systems(Startup, setup_camera);
     app.add_systems(Startup, create_board_resource);
     app.add_systems(Startup, create_board_background);
+    app.add_systems(Startup, create_players);
     app.add_systems(Startup, draw_initial_chips);
-    app.add_systems(PostStartup, test_update_board_state);
+    app.add_systems(PostUpdate, test_update_board_state);
 
     // Normal updates
     app.add_systems(Update, update_chip_colour);
@@ -163,6 +167,10 @@ fn update_chip_colour(
     }
 }
 
-fn test_update_board_state(mut board: ResMut<Board>) {
-    board[(2, 3)] = BoardState::Taken(player.as_ref().clone());
+fn test_update_board_state(mut board: ResMut<Board>, players: Query<&Player>) {
+    let player1 = players.iter().find(|p| p.num == Player1).unwrap();
+    let player2 = players.iter().find(|p| p.num == Player2).unwrap();
+
+    board[(2, 3)] = BoardState::Taken(player1.clone());
+    board[(3, 2)] = BoardState::Taken(player2.clone());
 }
