@@ -53,6 +53,19 @@ jobs:
             bin: windows-aarch64.exe
 
     steps:
+      - name: Install llvm clang (Linux)
+        if: ${{ startsWith(matrix.platform.os_name, 'Linux') }}
+        run: bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
+
+      - name: Install mold linker (Linux)
+        uses: rui314/setup-mold@v1
+        with:
+          make-default: true
+
+      - name: Install libwayland (Linux)
+        if: ${{ startsWith(matrix.platform.os_name, 'Linux') }}
+        run: sudo apt install libwayland-dev
+
       - name: Checkout the connect 4 game
         uses: actions/checkout@v4
 
