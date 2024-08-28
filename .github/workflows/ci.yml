@@ -55,6 +55,11 @@ jobs:
     steps:
       - name: Checkout the connect 4 game
         uses: actions/checkout@v4
+
+      - name: Install wayland-dev
+        if: ${{ startsWith(matrix.platform.os_name, 'Linux') }}
+        run: apt update && apt install wayland-dev
+
       - name: Build binary
         uses: houseabsolute/actions-rust-cross@v0
         with:
