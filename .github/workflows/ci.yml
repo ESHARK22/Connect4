@@ -68,13 +68,13 @@ jobs:
 
       - name: Install build dependencies
         if: ${{ startsWith(matrix.platform.os_name, 'Linux') }}
-        run: sudo apt install libwayland-dev libasound2-dev
+        run: sudo apt install libwayland-dev libasound2-dev librust-libudev-sys-dev
 
       - name: Checkout the connect 4 game
         uses: actions/checkout@v4
 
       - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
+        uses: mxschmitt/action-tmate@v4
 
       - name: Build binary
         uses: houseabsolute/actions-rust-cross@v0
