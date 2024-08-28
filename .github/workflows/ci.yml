@@ -60,8 +60,12 @@ jobs:
       - name: Setup rust cache
         uses: Swatinem/rust-cache@v2
 
+      - name: Setup PKG config path (Linux)
+        if: ${{ startsWith(matrix.platform.os_name, 'Linux') }}
+        run: export PKG_CONFIG_SYSROOT_DIR=/
+
       - name: Build binary
-        run: PKG_CONFIG_SYSROOT_DIR=/ cargo build --release --target ${{ matrix.platform.target }}
+        run: cargo build --release --target ${{ matrix.platform.target }}
 
       - name: Rename binary (linux)
         if: ${{ startsWith(matrix.platform.os_name, 'Linux') }}
