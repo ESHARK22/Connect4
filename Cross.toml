@@ -9,13 +9,13 @@ pre-build = [
 ]
 
 [target.aarch64-unknown-linux-musl]
-image = "ubuntu:jammy"
+image = "ubuntu:noble"
 
 [target.x86_64-unknown-linux-musl]
 image = "ubuntu:jammy"
 
 [target.aarch64-unknown-linux-gnu]
-image = "ubuntu:jammy"
+image = "ubuntu:noble@sha256:820a8779863b9b666fd1585cd79b2d8e213b1193e4264c56239d90e9df3b0542"
 
 [target.x86_64-unknown-linux-gnu]
 image = "ubuntu:jammy"
