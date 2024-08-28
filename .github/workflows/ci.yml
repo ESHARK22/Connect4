@@ -73,6 +73,9 @@ jobs:
       - name: Checkout the connect 4 game
         uses: actions/checkout@v4
 
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+
       - name: Build binary
         uses: houseabsolute/actions-rust-cross@v0
         with:
