@@ -45,12 +45,12 @@ jobs:
           - os_name: Windows-aarch64
             os: ubuntu-24.04
             target: aarch64-pc-windows-gnullvm
-            bin: TODO.EXE
+            bin: windows-aarch64.exe
 
           - os_name: Windows-x86_64
             os: ubuntu-24.04
             target: x86_64-pc-windows-gnullvm
-            bin: TODO.EXE
+            bin: windows-x86_64.exe
 
     steps:
       - name: Checkout the connect 4 game
@@ -83,6 +83,7 @@ jobs:
 
       - name: Build binary
         run: PKG_CONFIG_SYSROOT_DIR=/ CARGO_FEATURE_PURE=1 cargo build --release --target ${{ matrix.platform.target }}
+
       - name: Rename binary (linux)
         if: ${{ startsWith(matrix.platform.os_name, 'Linux') }}
         run: mv target/${{ matrix.platform.target }}/release/connect4 target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }}
