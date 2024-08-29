@@ -68,6 +68,13 @@ jobs:
       - name: Symlink llvm 18
         run: for file in /usr/lib/llvm-18/bin/*; do sudo ln -sf "$file" "/bin/$(basename "$file")"; done
 
+      - name: Donnload and install llvm-mingw (Windows)
+        if: ${{ startsWith(matrix.platform.os_name, 'Windows') }}
+        run: |
+          wget https://github.com/mstorsjo/llvm-mingw/releases/download/20240619/llvm-mingw-20240619-ucrt-ubuntu-20.04-x86_64.tar.xz && \
+          tar -xvf llvm-mingw-20240619-ucrt-ubuntu-20.04-x86_64.tar.xz && \
+          for file in llvm-mingw-20240619-ucrt-ubuntu-20.04-x86_64/bin/*; do sudo ln -sf "$PWD/$file"" /bin/$(basename $file); done
+
       - name: Install rustup target
         run: rustup target add ${{ matrix.platform.target }}
 
