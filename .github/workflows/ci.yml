@@ -102,4 +102,5 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.event.release
         with:
-          file: target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }}
+          files: 
+            - target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }}
