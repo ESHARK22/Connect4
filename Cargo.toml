@@ -18,3 +18,4 @@ array2d = "0.3.2"
 inline_colorization = "0.1.6"
 bevy-inspector-egui = { version = "0.25.2", features = ["highlight_changes"] }
 bevy = { version = "0.14.1", features = ["wayland"] }
+bevy_mod_picking = "0.20.1"
