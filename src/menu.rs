@@ -13,6 +13,7 @@ pub fn plugin_status_text(app: &mut App) {
     app.register_type::<ResetButton>();
 
     app.add_systems(Startup, spawn_inital_status_text);
+    app.add_systems(Startup, spawn_click_to_reset);
     app.add_systems(Update, write_current_status_text);
     app.add_systems(Update, show_hide_reset_button);
 }
@@ -64,7 +65,7 @@ fn spawn_click_to_reset(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
-    let text_bg_rect = Mesh2dHandle(meshes.add(Rectangle::new(8., 15.)));
+    let text_bg_rect = Mesh2dHandle(meshes.add(Rectangle::new(30., 15.)));
     command.spawn((
         MaterialMesh2dBundle {
             mesh: text_bg_rect,
