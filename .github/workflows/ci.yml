@@ -10,6 +10,7 @@ on:
 permissions:
   contents: write
 
+
 jobs:
   build:
     name: ${{ matrix.platform.os_name }} with rust ${{ matrix.toolchain }}
@@ -39,21 +40,21 @@ jobs:
       - name: Install build dependencies
         run: sudo apt install -y build-essential lsb-release wget software-properties-common gnupg mold gcc-aarch64-linux-gnu librust-wayland-client-dev librust-libudev-sys-dev librust-alsa-sys-dev musl-tools
 
-      - name: Install llvm 18
+      - name: Install llvm 19
         run: |
           wget https://apt.llvm.org/llvm.sh \
           && chmod +x llvm.sh               \
-          && sudo ./llvm.sh 18
+          && sudo ./llvm.sh 19
 
-      - name: Symlink llvm 18
-        run: for file in /usr/lib/llvm-18/bin/*; do sudo ln -sf "$file" "/bin/$(basename "$file")"; done
+      - name: Symlink llvm-19 to llvm
+        run: for file in /usr/lib/llvm-19/bin/*; do sudo ln -sf "$file" "/bin/$(basename "$file")"; done
 
       - name: Donnload and install llvm-mingw (Windows)
         if: ${{ startsWith(matrix.platform.os_name, 'Windows') }}
         run: |
-          wget https://github.com/mstorsjo/llvm-mingw/releases/download/20240619/llvm-mingw-20240619-ucrt-ubuntu-20.04-x86_64.tar.xz && \
-          tar -xvf llvm-mingw-20240619-ucrt-ubuntu-20.04-x86_64.tar.xz && \
-          for file in llvm-mingw-20240619-ucrt-ubuntu-20.04-x86_64/bin/*; do sudo ln -sf "$PWD/$file" /bin/$(basename $file); done
+          wget -O llvm-mingw.tar.xz https://github.com/mstorsjo/llvm-mingw/releases/download/20250305/llvm-mingw-20250305-ucrt-ubuntu-20.04-x86_64.tar.xz && \
+          tar -xvf llvm-mingw.tar.xz && \
+          for file in llvm-mingw/bin/*; do sudo ln -sf "$PWD/$file" /bin/$(basename $file); done
 
       - name: Install rustup target
         run: rustup target add ${{ matrix.platform.target }}
