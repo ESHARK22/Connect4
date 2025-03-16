@@ -54,7 +54,7 @@ jobs:
         run: |
           wget -O llvm-mingw.tar.xz https://github.com/mstorsjo/llvm-mingw/releases/download/20250305/llvm-mingw-20250305-ucrt-ubuntu-20.04-x86_64.tar.xz && \
           tar -xvf llvm-mingw.tar.xz && \
-          for file in llvm-mingw/bin/*; do
+          for file in llvm-mingw*/bin/*; do
             target="/bin/$(basename "$file")"
             echo "Linking $PWD/$file to $target"
             if [ -f "$target" ]; then
