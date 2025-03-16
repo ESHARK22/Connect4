@@ -1,5 +1,5 @@
 use crate::board::{Board, BoardState, GameState};
-use crate::players::CurrentPlayer;
+use crate::players::{get_player1, CurrentPlayer, Player};
 
 use array2d::Array2D;
 use bevy::sprite::{MaterialMesh2dBundle, Mesh2dHandle};
@@ -92,7 +92,9 @@ fn show_hide_reset_button(
     };
 }
 
-fn reset_game(mut command: Commands) {
+fn reset_game(mut command: Commands, players: Query<&Player>) {
     command.insert_resource(GameState::Playing);
     command.insert_resource(Board::default());
+    command.insert_resource(CurrentPlayer(get_player1(&players)));
+
 }
