@@ -29,7 +29,7 @@ pub fn plugin_board(app: &mut App) {
         require_markers: false,
         raycast_visibility: RaycastVisibility::Ignore,
     });
-    app.insert_resource(Board(Array2D::filled_with(BoardState::Empty, 6, 7)));
+    app.insert_resource(Board::default());
     app.insert_resource(GameState::Playing);
 
     app.add_systems(Startup, spawn_board_background);
@@ -46,20 +46,28 @@ pub fn plugin_board(app: &mut App) {
 #[derive(Deref, DerefMut, Resource)]
 pub struct Board(Array2D<BoardState>);
 
+impl Default for Board {
+    fn default() -> Self {
+        Board(Array2D::filled_with(BoardState::Empty, 6, 7))
+    }
+}
+
 #[derive(Clone, PartialEq)]
 pub enum BoardState {
     Empty,
     Taken(Player),
 }
 
-#[derive(Clone, PartialEq, Resource)]
+#[derive(Clone, PartialEq, Resource, Reflect)]
+#[reflect(Resource)]
 pub enum GameState {
     Playing,
     Won,
     Draw,
 }
 
-#[derive(Component)]
+#[derive(Component, Reflect)]
+#[reflect(Component)]
 pub struct Chip {
     row: f32,
     col: f32,
@@ -80,7 +88,7 @@ pub fn is_at_bottom(board: Board, row: usize, column: usize) -> bool {
     }
 
     match board.get(row - 1, column) {
-        Some(&ref state) => {
+        Some(state) => {
             match state {
                 BoardState::Taken(_) => true, // Cant go any lower
                 BoardState::Empty => false,   // Could have gone lower
@@ -105,7 +113,7 @@ pub fn get_lowest_chip_row(board: Board, col: usize) -> Option<usize> {
         row_index -= 1
     }
 
-    return Some(row_index);
+    Some(row_index)
 }
 
 fn is_full(board: Board) -> bool {
@@ -126,7 +134,7 @@ fn check_horizontal_wins(board: Board) -> Option<Player> {
         for col_index in 0..max_col_index {
             // Its fine to unwrap here, since if the item doesnt exist, something is wrong with max_col_index
             // (We should never be trying to read a non existent item here)
-            let item1 = board.get(row_index, col_index + 0).unwrap().clone();
+            let item1 = board.get(row_index, col_index).unwrap().clone();
             let item2 = board.get(row_index, col_index + 1).unwrap().clone();
             let item3 = board.get(row_index, col_index + 2).unwrap().clone();
             let item4 = board.get(row_index, col_index + 3).unwrap().clone();
@@ -156,7 +164,7 @@ fn check_vertical_wins(board: Board) -> Option<Player> {
 
     for col_index in 0..board.num_columns() {
         for row_index in 0..max_row_index {
-            let item1 = board.get(row_index + 0, col_index).unwrap().clone();
+            let item1 = board.get(row_index, col_index).unwrap().clone();
             let item2 = board.get(row_index + 1, col_index).unwrap().clone();
             let item3 = board.get(row_index + 2, col_index).unwrap().clone();
             let item4 = board.get(row_index + 3, col_index).unwrap().clone();
@@ -182,7 +190,7 @@ fn check_diagonal_wins(board: Board) -> Option<Player> {
 
     for row_index in 0..max_row_index {
         for col_index in 0..max_col_index {
-            let item1 = board.get(row_index + 0, col_index + 0).unwrap().clone();
+            let item1 = board.get(row_index, col_index).unwrap().clone();
             let item2 = board.get(row_index + 1, col_index + 1).unwrap().clone();
             let item3 = board.get(row_index + 2, col_index + 2).unwrap().clone();
             let item4 = board.get(row_index + 3, col_index + 3).unwrap().clone();
@@ -203,7 +211,7 @@ fn check_diagonal_wins(board: Board) -> Option<Player> {
 
     for row_index in 0..max_row_index {
         for col_index in (min_col_index..board.num_columns()).rev() {
-            let item1 = board.get(row_index + 0, col_index - 0).unwrap().clone();
+            let item1 = board.get(row_index, col_index).unwrap().clone();
             let item2 = board.get(row_index + 1, col_index - 1).unwrap().clone();
             let item3 = board.get(row_index + 2, col_index - 2).unwrap().clone();
             let item4 = board.get(row_index + 3, col_index - 3).unwrap().clone();
@@ -300,7 +308,7 @@ fn spawn_initial_col_hightlights(
                 visibility: Visibility::Visible,
                 ..default()
             },
-            ColPicker { col: col as f32 },
+            ColPicker { col },
             PickableBundle::default(),
             On::<Pointer<Click>>::run(update_col_handle_click),
         ));
@@ -396,6 +404,5 @@ fn update_update_game_state(mut game_state: ResMut<GameState>, board: Res<Board>
         || check_horizontal_wins(Board(board.clone())).is_some()
     {
         *game_state = GameState::Won;
-        return;
     }
 }
