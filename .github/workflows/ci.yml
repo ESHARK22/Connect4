@@ -63,7 +63,7 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Build binary
-        run: PKG_CONFIG_SYSROOT_DIR=/ CARGO_FEATURE_PURE=1 cargo build --release --target ${{ matrix.platform.target }}
+        run: PKG_CONFIG_SYSROOT_DIR=/ cargo build --release --target ${{ matrix.platform.target }}
 
       - name: Rename binary (linux)
         if: ${{ startsWith(matrix.platform.os_name, 'Linux') }}
