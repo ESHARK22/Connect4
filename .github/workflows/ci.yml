@@ -78,22 +78,22 @@ jobs:
         with:
           name: ${{ matrix.platform.bin }}
           path: target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }}
-
-      - name: Release to GitHub
-        uses: softprops/action-gh-release@v2
-        if: ${{ github.event_name == 'release' }}
-        with:
-          files: target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }}
-
+          
       - name: (Windows) Upload libunwind.dll as an artifact 
         uses: actions/upload-artifact@v4
         if: ${{ startsWith(matrix.platform.os_name, 'Windows') }}
         with:
           name: libunwind.dll
           path: llvm-mingw*/x86_64-w64-mingw32/bin/libunwind.dll
+      
+      - name: Release to GitHub
+        uses: softprops/action-gh-release@v2
+        if: ${{ github.event_name == 'release' }}
+        with:
+          files: target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }}
 
       - name: (Windows) Upload libunwind.dll on a release 
-        uses: actions/upload-artifact@v4
-        if: ${{ startsWith(matrix.platform.os_name, 'Windows') && github.event_name == 'release' }}
+        uses: softprops/action-gh-release@v2
+        if: ${{ github.event_name == 'release' && startsWith(matrix.platform.os_name, 'Windows') }}
         with:
           files: llvm-mingw*/x86_64-w64-mingw32/bin/libunwind.dll
