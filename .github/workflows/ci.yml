@@ -54,20 +54,7 @@ jobs:
         run: |
           wget -O llvm-mingw.tar.xz https://github.com/mstorsjo/llvm-mingw/releases/download/20250305/llvm-mingw-20250305-ucrt-ubuntu-20.04-x86_64.tar.xz && \
           tar -xvf llvm-mingw.tar.xz && \
-          for file in llvm-mingw*/bin/*; do
-            target="/bin/$(basename "$file")"
-            echo "Linking $PWD/$file to $target"
-            if [ -f "$target" ]; then
-              echo "  Warning: $target exists. Removing..."
-              sudo rm "$target"
-            fi
-            sudo ln -sf "$PWD/$file" "$target"
-            if [ -L "$target" ]; then
-              echo "  Successfully created symbolic link: $target"
-            else
-              echo "  Error: Failed to create symbolic link: $target"
-            fi
-          done
+          for file in llvm-mingw*/bin/*; do sudo ln -sf "$PWD/$file" "/bin/$(basename "$file")"; done
 
       - name: Install rustup target
         run: rustup target add ${{ matrix.platform.target }}
