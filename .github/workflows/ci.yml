@@ -5,7 +5,7 @@ on:
   pull_request:
   workflow_dispatch:
   release:
-    types: [created]
+    types: [created, published]
 
 permissions:
   contents: write
@@ -81,6 +81,6 @@ jobs:
 
       - name: Release to GitHub
         uses: softprops/action-gh-release@v2
-        if: github.event.release
+        if: ${{ github.event_name == 'release' }}
         with:
           files: target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }}
