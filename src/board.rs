@@ -25,6 +25,10 @@ const YELLOW: Color = Color::srgb(1.5, 1.5, 0.);
 const BLACK: Color = Color::srgb(0., 0., 0.);
 
 pub fn plugin_board(app: &mut App) {
+
+    app.register_type::<GameState>();
+    app.register_type::<Chip>();
+
     app.insert_resource(RaycastBackendSettings {
         require_markers: false,
         raycast_visibility: RaycastVisibility::Ignore,
