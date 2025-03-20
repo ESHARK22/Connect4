@@ -97,3 +97,17 @@ jobs:
         if: ${{ github.event_name == 'release' && startsWith(matrix.platform.os_name, 'Windows') }}
         with:
           files: llvm-mingw*/x86_64-w64-mingw32/bin/libunwind.dll
+
+  check:
+    if: always()
+
+    needs:
+    - build
+
+    runs-on: Ubuntu-latest
+
+    steps:
+      - name: Decide whether the needed jobs succeeded or failed
+        uses: re-actors/alls-green@release/v1
+        with:
+          jobs: ${{ toJSON(needs) }}
