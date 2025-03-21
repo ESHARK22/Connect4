@@ -1,5 +1,5 @@
 #![allow(unused)]
-
+use revy;
 use array2d::Array2D;
 use bevy::{
     prelude::*,
@@ -28,6 +28,11 @@ fn main() {
     );
     // app.add_plugins(DebugPickingPlugin);
     app.add_plugins(WorldInspectorPlugin::new());
+
+    app..add_plugins({
+        let rec = revy::RecordingStreamBuilder::new("connect4.").spawn().unwrap();
+        revy::RerunPlugin { rec }
+    })
 
     app.add_plugins(plugin_board);
     app.add_plugins(plugin_players);
