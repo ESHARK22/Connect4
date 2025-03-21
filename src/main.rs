@@ -32,7 +32,7 @@ fn main() {
     app..add_plugins({
         let rec = revy::RecordingStreamBuilder::new("connect4.").spawn().unwrap();
         revy::RerunPlugin { rec }
-    })
+    });
 
     app.add_plugins(plugin_board);
     app.add_plugins(plugin_players);
