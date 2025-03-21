@@ -29,7 +29,7 @@ fn main() {
     // app.add_plugins(DebugPickingPlugin);
     app.add_plugins(WorldInspectorPlugin::new());
 
-    app..add_plugins({
+    app.add_plugins({
         let rec = revy::RecordingStreamBuilder::new("connect4.").spawn().unwrap();
         revy::RerunPlugin { rec }
     });
